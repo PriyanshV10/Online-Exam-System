@@ -9,6 +9,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import com.exam.dao.UserDao;
 import com.exam.model.LoginRequest;
+import com.exam.model.LoginResponse;
 import com.exam.model.User;
 import com.google.gson.Gson;
 
@@ -78,9 +79,23 @@ public class LoginServlet extends HttpServlet {
 			}
 			
 			if(user.getStatus().equals("REJECTED")) {
+				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				
+				response.getWriter().write("{\"error\":\"Account Approval Rejected!\"}");
+				return;
 			}
 		}
+		
+		HttpSession session = request.getSession();
+		session.setAttribute("userId", user.getId());
+		session.setAttribute("role", user.getRole());
+		session.setAttribute("name", user.getName());
+		
+		LoginResponse userResponse = new LoginResponse(user.getId(), user.getName(), user.getRole());
+		String json = gson.toJson(userResponse);
+		
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().write(json);
 
 	}
 }

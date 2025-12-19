@@ -2,14 +2,12 @@ package com.exam.controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.exam.dao.UserDao;
 import com.exam.model.LoginRequest;
-import com.exam.model.LoginResponse;
+import com.exam.model.SessionInfo;
 import com.exam.model.User;
 import com.google.gson.Gson;
 
@@ -24,13 +22,9 @@ public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		PrintWriter out = response.getWriter();
-		out.println("Working!!");
-	}
-
-	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.setCharacterEncoding("UTF-8");
+		
 		BufferedReader reader = request.getReader();
 
 //		StringBuilder rawBody = new StringBuilder();
@@ -45,7 +39,7 @@ public class LoginServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 
-		if (data.email == null || data.password == null || data.email.trim().isEmpty()
+		if (data == null || data.email == null || data.password == null || data.email.trim().isEmpty()
 				|| data.password.trim().isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
@@ -66,7 +60,7 @@ public class LoginServlet extends HttpServlet {
 		if (!BCrypt.checkpw(data.password, user.getPassword())) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-			response.getWriter().write("{\"error\":\"No User Found!\"}");
+			response.getWriter().write("{\"error\":\"Wrong Password!\"}");
 			return;
 		}
 		
@@ -87,11 +81,9 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		HttpSession session = request.getSession();
-		session.setAttribute("userId", user.getId());
-		session.setAttribute("role", user.getRole());
-		session.setAttribute("name", user.getName());
 		
-		LoginResponse userResponse = new LoginResponse(user.getId(), user.getName(), user.getRole());
+		SessionInfo userResponse = new SessionInfo(user.getId(), user.getName(), user.getRole());
+		session.setAttribute("info", userResponse);
 		String json = gson.toJson(userResponse);
 		
 		response.setStatus(HttpServletResponse.SC_OK);

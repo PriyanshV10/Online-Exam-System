@@ -1,22 +1,35 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
-import { AuthContext } from "../context/AuthContext";
 
-export default function Login() {
+export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
       const res = await api.post("/login", { email, password });
+
+      // store user in App state
       setUser(res.data);
+
       navigate("/dashboard");
-    } catch {
-      alert("Invalid credentials");
+    } catch (err) {
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.error || "Login failed";
+
+        if (status === 400 || status === 401 || status === 403) {
+          alert(message);
+        } else {
+          alert("Something went wrong");
+        }
+      } else {
+        alert("Server not reachable");
+      }
     }
   };
 
@@ -31,18 +44,21 @@ export default function Login() {
         </h2>
 
         <input
-          className="w-full p-2 border text-white rounded mb-4"
+          type="email"
+          className="w-full p-2 border rounded mb-4 text-white bg-transparent"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
           type="password"
-          className="w-full p-2 border rounded mb-6"
+          className="w-full p-2 border rounded mb-6 text-white bg-transparent"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">

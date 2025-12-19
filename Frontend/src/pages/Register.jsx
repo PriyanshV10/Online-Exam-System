@@ -27,10 +27,19 @@ export default function Register() {
         navigate("/");
       }, 3000);
     } catch (err) {
-      if (err.response?.data?.error) {
-        setMessage(err.response.data.error);
+      if (err.response) {
+        const status = err.response.status;
+        const msg = err.response.data?.error || "Registration failed";
+
+        if (status === 400) {
+          setMessage(msg);
+        } else if (status === 409) {
+          setMessage(msg);
+        } else {
+          setMessage("Server error. Try again later.");
+        }
       } else {
-        setMessage("Registration failed. Try again.");
+        setMessage("Server not reachable");
       }
     }
   };

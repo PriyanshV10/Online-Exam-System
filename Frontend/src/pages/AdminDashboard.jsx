@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#101010] text-white p-8">
+    <div className="min-h-screen max-w-4xl mx-auto bg-[#101010] text-white mt-16">
       <h1 className="text-3xl font-bold mb-6">Admin - User Approvals</h1>
 
       {users.length === 0 ? (
@@ -49,9 +49,9 @@ export default function AdminDashboard() {
         <table className="w-full bg-[#282828] rounded-lg overflow-hidden">
           <thead className="bg-[#1f1f1f]">
             <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Actions</th>
+              <th className="p-3 w-1/3 text-left">Name</th>
+              <th className="p-3 w-1/3 text-left">Email</th>
+              <th className="p-3 w-1/3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>

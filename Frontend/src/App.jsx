@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import Login from "./pages/Login";
@@ -7,15 +7,19 @@ import Dashboard from "./pages/Dashboard";
 import ExamList from "./pages/ExamList";
 import ExamAttempt from "./pages/ExamAttempt";
 import Result from "./pages/Result";
+import NotFound from "./pages/NotFound";
 
 import Navbar from "./components/Navbar";
 import api from "./api/api";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicRoute from "./routes/PublicRoute";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session on app load
+  // Restore session
   useEffect(() => {
     api
       .get("/me")
@@ -26,7 +30,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#101010] text-white">
+      <div className="min-h-screen flex items-center justify-center text-white bg-black">
         Loading...
       </div>
     );
@@ -37,14 +41,76 @@ export default function App() {
       <Navbar user={user} setUser={setUser} />
 
       <Routes>
-        <Route path="/" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register />} />
+        {/* PUBLIC ROUTES */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute user={user}>
+              <Login setUser={setUser} />
+            </PublicRoute>
+          }
+        />
 
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/profile" element={<Profile />} /> */}
-        <Route path="/exams" element={<ExamList />} />
-        <Route path="/exam/:id" element={<ExamAttempt />} />
-        <Route path="/results" element={<Result />} />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute user={user}>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        {/* PROTECTED ROUTES */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/exams"
+          element={
+            <ProtectedRoute user={user}>
+              <ExamList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/exam/:id"
+          element={
+            <ProtectedRoute user={user}>
+              <ExamAttempt />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/results"
+          element={
+            <ProtectedRoute user={user}>
+              <Result />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute user={user}>{/* <Profile /> */}</ProtectedRoute>
+          }
+        />
+
+        {/* UNKNOWN ROUTES */}
+
+        {/* If LOGGED IN → show 404 */}
+        <Route
+          path="*"
+          element={user ? <NotFound /> : <Navigate to="/login" replace />}
+        />
       </Routes>
     </>
   );

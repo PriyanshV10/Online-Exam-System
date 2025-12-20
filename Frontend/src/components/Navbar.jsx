@@ -9,7 +9,7 @@ export default function Navbar({ user, setUser }) {
       await api.post("/logout");
     } finally {
       setUser(null);
-      navigate("/");
+      navigate("/login");
     }
   };
 

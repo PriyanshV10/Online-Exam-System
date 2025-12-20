@@ -17,14 +17,9 @@ export default function Dashboard() {
       })
       .catch(() => {
         // session expired or not logged in
-        navigate("/");
+        navigate("/login");
       });
   }, [navigate]);
-
-  const handleLogout = async () => {
-    await api.post("/logout");
-    navigate("/");
-  };
 
   if (!user) {
     return (
@@ -37,12 +32,8 @@ export default function Dashboard() {
   return (
     <>
       <div className="min-h-screen bg-[#101010] text-white p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="container mx-auto">
           <h1 className="text-3xl font-bold mb-4">Welcome, {user.name}</h1>
-
-          <p className="text-gray-400 mb-8">
-            Role: <span className="text-green-400">{user.role}</span>
-          </p>
 
           <div className="">
             {user.role === "ADMIN" ? (

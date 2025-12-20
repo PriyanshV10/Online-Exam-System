@@ -16,7 +16,7 @@ export default function Login({ setUser }) {
       // store user in App state
       setUser(res.data);
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       if (err.response) {
         const status = err.response.status;

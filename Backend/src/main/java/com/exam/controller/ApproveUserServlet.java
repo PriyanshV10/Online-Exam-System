@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import com.exam.dao.UserDao;
+import com.exam.enums.UserStatus;
 import com.exam.model.ApproveUserRequest;
 import com.google.gson.Gson;
 
@@ -39,13 +40,13 @@ public class ApproveUserServlet extends HttpServlet {
 		
 		UserDao dao = new UserDao();		
 		
-		if(data.status.equalsIgnoreCase("APPROVED")) {
-			dao.updateUserStatus(data.id, "APPROVED");
+		if(UserStatus.APPROVED.name().equalsIgnoreCase(data.status)) {
+			dao.updateUserStatus(data.id, UserStatus.APPROVED.name());
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().write("{\"message\": \"Request Approved!\"}");			
 		}
-		else if(data.status.equalsIgnoreCase("REJECTED")) {
-			dao.updateUserStatus(data.id, "REJECTED");
+		else if(UserStatus.REJECTED.name().equalsIgnoreCase(data.status)) {
+			dao.updateUserStatus(data.id, UserStatus.REJECTED.name());
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().write("{\"message\": \"Request Rejected!\"}");	
 		}

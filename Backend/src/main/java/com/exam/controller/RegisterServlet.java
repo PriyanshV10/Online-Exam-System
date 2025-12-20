@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.exam.dao.UserDao;
+import com.exam.enums.Role;
+import com.exam.enums.UserStatus;
 import com.exam.model.RegisterRequest;
 import com.google.gson.Gson;
 
@@ -45,7 +47,7 @@ public class RegisterServlet extends HttpServlet {
 		}
 		
 		String hashedPassword = BCrypt.hashpw(data.password, BCrypt.gensalt());
-		dao.createUser(data.name, data.email, hashedPassword, "STUDENT", "PENDING");
+		dao.createUser(data.name, data.email, hashedPassword, Role.STUDENT.name(), UserStatus.PENDING.name());
 		
 		response.setStatus(HttpServletResponse.SC_CREATED);
 		response.getWriter().write("{\"message\":\"Request sent for approval.\"}");

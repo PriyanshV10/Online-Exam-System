@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.exam.dao.UserDao;
+import com.exam.enums.Role;
+import com.exam.enums.UserStatus;
 import com.exam.model.LoginRequest;
 import com.exam.model.SessionInfo;
 import com.exam.model.User;
@@ -64,15 +66,15 @@ public class LoginServlet extends HttpServlet {
 			return;
 		}
 		
-		if(user.getRole().equals("STUDENT")) {
-			if(user.getStatus().equals("PENDING")) {
+		if(Role.STUDENT.name().equals(user.getRole())) {
+			if(UserStatus.PENDING.name().equals(user.getStatus())) {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				
 				response.getWriter().write("{\"error\":\"Pending Admin Approval!\"}");
 				return;
 			}
 			
-			if(user.getStatus().equals("REJECTED")) {
+			if(UserStatus.REJECTED.name().equals(user.getStatus())) {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				
 				response.getWriter().write("{\"error\":\"Account Approval Rejected!\"}");

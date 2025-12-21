@@ -8,10 +8,10 @@ export default function AdminDashboard() {
 
   const fetchPendingUsers = async () => {
     try {
-      const res = await api.get("/admin/pending-users");
-      setUsers(res.data);
+      const res = await api.get("/admin/users");
+      setUsers(res.data.data);
     } catch (err) {
-      setError("Failed to load pending users");
+      setError("Failed to load pending users" + err);
     } finally {
       setLoading(false);
     }

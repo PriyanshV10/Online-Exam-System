@@ -13,7 +13,7 @@ export default function Dashboard() {
     api
       .get("/me")
       .then((res) => {
-        setUser(res.data);
+        setUser(res.data.data);
       })
       .catch(() => {
         // session expired or not logged in

@@ -29,6 +29,6 @@ public class CurrentUserServlet extends HttpServlet {
 			return;
 		}
 		
-		ResponseUtil.ok(response, info);
+		ResponseUtil.ok(response, ApiResponse.success(info));
 	}
 }

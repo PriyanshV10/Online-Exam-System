@@ -3,10 +3,12 @@ package com.exam.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.exam.enums.ExamStatus;
+import com.exam.enums.StatusUpdateResult;
 import com.exam.model.Exam;
 import com.exam.util.DBUtil;
 
@@ -106,7 +108,7 @@ public class ExamDao {
 				exam.setStatus(rs.getString("status"));
 
 				return exam;
-			} 
+			}
 
 			return null;
 		} catch (Exception e) {
@@ -118,26 +120,34 @@ public class ExamDao {
 		}
 	}
 
-	public void updateExamStatus(int examId, String status) {
-		Connection connection = null;
-		PreparedStatement st = null;
+	public StatusUpdateResult updateExamStatus(int examId, String newStatus) {
 
-		try {
-			connection = DBUtil.getConnection();
-			String query = "UPDATE exams SET status = ? WHERE id = ?";
-			st = connection.prepareStatement(query);
+	    String sql = "UPDATE exams SET status = ? WHERE id = ? AND status != ?";
 
-			st.setString(1, status);
-			st.setInt(2, examId);
+	    try (Connection con = DBUtil.getConnection();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
 
-			st.executeUpdate();
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		} finally {
-			DBUtil.closeResources(connection, st, null);
-		}
+	        ps.setString(1, newStatus);
+	        ps.setInt(2, examId);
+	        ps.setString(3, newStatus);
+
+	        int rows = ps.executeUpdate();
+
+	        if (rows > 0) {
+	            return StatusUpdateResult.SUCCESS;
+	        }
+
+	        if (getExamById(examId) == null) {
+	            return StatusUpdateResult.NOT_FOUND;
+	        }
+
+	        return StatusUpdateResult.NO_CHANGE;
+
+	    } catch (Exception e) {
+	        throw new RuntimeException(e);
+	    }
 	}
+
 
 	public boolean hasQuestions(int examId) {
 		Connection connection = null;

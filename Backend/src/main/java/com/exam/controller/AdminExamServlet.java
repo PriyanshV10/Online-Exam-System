@@ -1,17 +1,24 @@
 package com.exam.controller;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import com.exam.dao.ExamDao;
+import com.exam.dao.OptionDao;
+import com.exam.dao.QuestionDao;
+import com.exam.enums.ExamStatus;
+import com.exam.enums.StatusUpdateResult;
+import com.exam.model.AddQuestionRequest;
 import com.exam.model.ApiResponse;
 import com.exam.model.CreateExamRequest;
 import com.exam.model.Exam;
+import com.exam.model.Question;
 import com.exam.model.SessionInfo;
 import com.exam.util.ResponseUtil;
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,22 +26,108 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/api/admin/exams")
+@WebServlet("/api/admin/exams/*")
 public class AdminExamServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
+	private String[] pathParts(HttpServletRequest request) {
+		String pathInfo = request.getPathInfo();
+		if (pathInfo == null || pathInfo.equals("/"))
+			return new String[0];
+		return pathInfo.substring(1).split("/");
+	}
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ExamDao dao = new ExamDao();
-		List<Exam> list = dao.getAllExams();
-		
-		ResponseUtil.ok(response, ApiResponse.success(list));
+		String[] parts = pathParts(request);
+
+		// /api/admin/exams
+		if (parts.length == 0) {
+			listExams(request, response);
+			return;
+		}
+
+		// /api/admin/exams/{id}
+		if (parts.length == 1 && isNumber(parts[0])) {
+			getExam(request, response, Integer.parseInt(parts[0]));
+			return;
+		}
+
+		// /api/admin/exams/{id}/questions
+		if (parts.length == 2 && isNumber(parts[0]) && "questions".equals(parts[1])) {
+			getQuestions(request, response, Integer.parseInt(parts[0]));
+			return;
+		}
+
+		ResponseUtil.notFound(response, ApiResponse.error("Endpoint not found"));
+
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		BufferedReader reader = request.getReader();
-		Gson gson = new Gson();
+		String[] parts = pathParts(request);
 
-		CreateExamRequest data = gson.fromJson(reader, CreateExamRequest.class);
+		// /api/admin/exams
+		if (parts.length == 0) {
+			createExam(request, response);
+			return;
+		}
+
+		// /api/admin/exams/{id}/publish
+		if (parts.length == 2 && isNumber(parts[0]) && "publish".equals(parts[1])) {
+			publishExam(request, response, Integer.parseInt(parts[0]));
+			return;
+		}
+
+		// /api/admin/exams/{id}/questions
+		if (parts.length == 2 && isNumber(parts[0]) && "questions".equals(parts[1])) {
+			addQuestion(request, response, Integer.parseInt(parts[0]));
+			return;
+		}
+
+		ResponseUtil.notFound(response, ApiResponse.error("Endpoint not Found"));
+	}
+
+	private void listExams(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		ExamDao dao = new ExamDao();
+		List<Exam> list = dao.getAllExams();
+
+		ResponseUtil.ok(response, ApiResponse.success(list));
+	}
+
+	private void getExam(HttpServletRequest request, HttpServletResponse response, int examId) throws IOException {
+		ExamDao dao = new ExamDao();
+		Exam exam = dao.getExamById(examId);
+
+		if (exam == null) {
+			ResponseUtil.notFound(response, ApiResponse.error("Invalid Exam Id"));
+			return;
+		}
+
+		ResponseUtil.ok(response, ApiResponse.success(exam));
+	}
+
+	private void getQuestions(HttpServletRequest request, HttpServletResponse response, int examId) throws IOException {
+
+		ExamDao examDao = new ExamDao();
+		if (examDao.getExamById(examId) == null) {
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+			return;
+		}
+
+		QuestionDao questionDao = new QuestionDao();
+		OptionDao optionDao = new OptionDao();
+
+		List<Question> questions = questionDao.getQuestionByExamId(examId);
+
+		for (Question q : questions) {
+			q.setOptions(optionDao.getOptionsByQuestionId(q.getId()));
+		}
+
+		ResponseUtil.ok(response, ApiResponse.success(questions));
+	}
+
+	private void createExam(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		Gson gson = new Gson();
+		CreateExamRequest data = gson.fromJson(request.getReader(), CreateExamRequest.class);
 
 		if (data == null || data.title == null || data.title.trim().isEmpty() || data.description == null
 				|| data.duration <= 0 || data.totalMarks <= 0) {
@@ -49,6 +142,95 @@ public class AdminExamServlet extends HttpServlet {
 		int examId = dao.createExam(data.title, data.description, data.duration, data.totalMarks, sessionInfo.getId());
 
 		ResponseUtil.created(response, ApiResponse.success("Exam Created Successfully", Map.of("examId", examId)));
+	}
+
+	private void publishExam(HttpServletRequest request, HttpServletResponse response, int examId) throws IOException {
+		ExamDao dao = new ExamDao();
+		QuestionDao qDao = new QuestionDao();
+
+		Exam exam = dao.getExamById(examId);
+		if (exam == null) {
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+			return;
+		}
+
+		if (!dao.hasQuestions(examId)) {
+			ResponseUtil.badRequest(response, ApiResponse.error("Exam has no Questions"));
+			return;
+		}
+
+		if (exam.getTotalMarks() != qDao.getTotalMarks(examId)) {
+			ResponseUtil.conflict(response, ApiResponse.error("Total marks mismatch"));
+			return;
+		}
+
+		StatusUpdateResult res = dao.updateExamStatus(examId, ExamStatus.PUBLISHED.name());
+
+		switch (res) {
+		case SUCCESS:
+			ResponseUtil.ok(response, ApiResponse.successMessage("Exam published successfully"));
+			break;
+
+		case NO_CHANGE:
+			ResponseUtil.conflict(response, ApiResponse.error("Exam already published"));
+			break;
+
+		case NOT_FOUND:
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+			break;
+		}
+	}
+
+	private void addQuestion(HttpServletRequest request, HttpServletResponse response, int examId)
+			throws JsonSyntaxException, JsonIOException, IOException {
+		ExamDao examDao = new ExamDao();
+		Exam exam = examDao.getExamById(examId);
+		if (exam == null || ExamStatus.PUBLISHED.name().equals(exam.getStatus())) {
+			ResponseUtil.conflict(response, ApiResponse.error("Cannot modify published exam"));
+			return;
+		}
+
+		Gson gson = new Gson();
+		AddQuestionRequest data = gson.fromJson(request.getReader(), AddQuestionRequest.class);
+
+		if (data == null || data.getText() == null || data.getText().trim().isEmpty() || data.getOptions() == null
+				|| data.getCorrectOption() == null) {
+
+			ResponseUtil.badRequest(response, ApiResponse.error("Invalid question data"));
+			return;
+		}
+
+		if (data.getMarks() <= 0) {
+			ResponseUtil.badRequest(response, ApiResponse.error("Question Mark should be greater than 0"));
+			return;
+		}
+
+		QuestionDao dao = new QuestionDao();
+		int currentMarks = dao.getTotalMarks(examId);
+		if (currentMarks + data.getMarks() > exam.getTotalMarks()) {
+			ResponseUtil.conflict(response, ApiResponse.error("Total question marks exceed exam total marks"));
+			return;
+		}
+
+		int questionId = dao.addQuestion(examId, data.getText(), data.getMarks(), data.getOptions(),
+				data.getCorrectOption());
+
+		if (questionId == -1) {
+			ResponseUtil.serverError(response, ApiResponse.error("Failed to add question"));
+			return;
+		}
+
+		ResponseUtil.created(response,
+				ApiResponse.success("Question added successfully", Map.of("questionId", questionId)));
+	}
+
+	private boolean isNumber(String s) {
+		try {
+			Integer.parseInt(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 }

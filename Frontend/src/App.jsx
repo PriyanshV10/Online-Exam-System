@@ -23,7 +23,7 @@ export default function App() {
   useEffect(() => {
     api
       .get("/me")
-      .then((res) => setUser(res.data))
+      .then((res) => setUser(res.data.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);

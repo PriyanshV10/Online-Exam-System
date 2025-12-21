@@ -1,11 +1,20 @@
-package com.exam.model;
+ package com.exam.model;
+
+import java.util.List;
 
 public class Question {
 	int id;
 	int examId;
 	String text;
 	int marks;
+	List<Option> options;
 	
+	public List<Option> getOptions() {
+		return options;
+	}
+	public void setOptions(List<Option> options) {
+		this.options = options;
+	}
 	public int getId() {
 		return id;
 	}

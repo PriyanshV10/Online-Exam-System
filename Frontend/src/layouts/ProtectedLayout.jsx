@@ -12,7 +12,7 @@ export default function ProtectedLayout({ children }) {
     api
       .get("/me")
       .then((res) => {
-        setUser(res.data);
+        setUser(res.data.data);
       })
       .catch(() => {
         navigate("/");

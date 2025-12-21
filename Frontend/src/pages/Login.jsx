@@ -14,7 +14,7 @@ export default function Login({ setUser }) {
       const res = await api.post("/login", { email, password });
 
       // store user in App state
-      setUser(res.data);
+      setUser(res.data.data);
 
       navigate("/");
     } catch (err) {

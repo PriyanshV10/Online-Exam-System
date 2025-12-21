@@ -75,7 +75,7 @@ public class UpdateUserServlet extends HttpServlet {
 	    }
 
 	    if (!updated) {
-	    	ResponseUtil.notFound(response, "User not found");
+	    	ResponseUtil.notFound(response, ApiResponse.error("User not found"));
 	        return;
 	    }
 

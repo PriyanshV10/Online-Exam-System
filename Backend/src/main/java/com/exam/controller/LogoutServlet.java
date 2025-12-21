@@ -1,5 +1,7 @@
 package com.exam.controller;
 
+import com.exam.util.ResponseUtil;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,6 @@ public class LogoutServlet extends HttpServlet{
             session.invalidate();
         }
 
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        ResponseUtil.noContent(response);
 	}
 }

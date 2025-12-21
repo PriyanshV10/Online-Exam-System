@@ -8,7 +8,9 @@ import org.mindrot.jbcrypt.BCrypt;
 import com.exam.dao.UserDao;
 import com.exam.enums.Role;
 import com.exam.enums.UserStatus;
+import com.exam.model.ApiResponse;
 import com.exam.model.RegisterRequest;
+import com.exam.util.ResponseUtil;
 import com.google.gson.Gson;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -22,35 +24,26 @@ public class RegisterServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setCharacterEncoding("UTF-8");
-
 		BufferedReader reader = request.getReader();
 		Gson gson = new Gson();
 		RegisterRequest data = gson.fromJson(reader, RegisterRequest.class);
 
-		response.setContentType("application/json");
-
 		if (data == null || data.name == null || data.email == null || data.password == null || data.name.trim().isEmpty()
 				|| data.email.trim().isEmpty() || data.password.trim().isEmpty()) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-
-			response.getWriter().write("{\"error\":\"Name or Email or Password cannot be Empty.\"}");
+			ResponseUtil.badRequest(response, ApiResponse.error("Invalid Input"));
 			return;
 		}
 		
 		UserDao dao = new UserDao();
 		if(dao.emailExists(data.email)) {
-			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			
-			response.getWriter().write("{\"error\":\"User already exists!\"}");
+			ResponseUtil.conflict(response, ApiResponse.error("User Already Exists"));
 			return;
 		}
 		
 		String hashedPassword = BCrypt.hashpw(data.password, BCrypt.gensalt());
 		dao.createUser(data.name, data.email, hashedPassword, Role.STUDENT.name(), UserStatus.PENDING.name());
 		
-		response.setStatus(HttpServletResponse.SC_CREATED);
-		response.getWriter().write("{\"message\":\"Request sent for approval.\"}");
+		ResponseUtil.created(response, ApiResponse.successMessage("Request sent for approval"));
 		
 	}
 

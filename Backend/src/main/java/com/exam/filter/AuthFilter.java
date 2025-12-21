@@ -3,7 +3,9 @@ package com.exam.filter;
 import java.io.IOException;
 
 import com.exam.enums.Role;
+import com.exam.model.ApiResponse;
 import com.exam.model.SessionInfo;
+import com.exam.util.ResponseUtil;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -34,10 +36,7 @@ public class AuthFilter implements Filter {
 		HttpSession session = request.getSession(false);
 
 		if (session == null || session.getAttribute("info") == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.setContentType("application/json");
-			response.getWriter().write("{\"error\":\"Unauthorized\"}");
-
+			ResponseUtil.unauthorized(response);
 			return;
 		}
 
@@ -45,10 +44,7 @@ public class AuthFilter implements Filter {
 			SessionInfo sessionInfo = (SessionInfo) session.getAttribute("info");
 
 			if (!Role.ADMIN.name().equals(sessionInfo.getRole())) {
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-				response.setContentType("application/json");
-				response.getWriter().write("{\"error\":\"Unauthorized\"}");
-
+				ResponseUtil.forbidden(response, ApiResponse.error("Unauthorized"));
 				return;
 			}
 		}

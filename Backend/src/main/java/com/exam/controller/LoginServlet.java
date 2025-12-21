@@ -8,9 +8,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import com.exam.dao.UserDao;
 import com.exam.enums.Role;
 import com.exam.enums.UserStatus;
+import com.exam.model.ApiResponse;
 import com.exam.model.LoginRequest;
 import com.exam.model.SessionInfo;
 import com.exam.model.User;
+import com.exam.util.ResponseUtil;
 import com.google.gson.Gson;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -24,9 +26,7 @@ public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setCharacterEncoding("UTF-8");
-		
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {		
 		BufferedReader reader = request.getReader();
 
 //		StringBuilder rawBody = new StringBuilder();
@@ -39,13 +39,9 @@ public class LoginServlet extends HttpServlet {
 		Gson gson = new Gson();
 		LoginRequest data = gson.fromJson(reader, LoginRequest.class);
 
-		response.setContentType("application/json");
-
 		if (data == null || data.email == null || data.password == null || data.email.trim().isEmpty()
 				|| data.password.trim().isEmpty()) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-
-			response.getWriter().write("{\"error\":\"Email or Password is Empty.\"}");
+			ResponseUtil.badRequest(response, ApiResponse.error("Email and Password is required"));
 			return;
 		}
 
@@ -53,43 +49,33 @@ public class LoginServlet extends HttpServlet {
 		User user = dao.findByEmail(data.email);
 
 		if (user == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-			response.getWriter().write("{\"error\":\"No User Found!\"}");
+			ResponseUtil.unauthorized(response, ApiResponse.error("User Not Found!"));
 			return;
 		}
 
 		if (!BCrypt.checkpw(data.password, user.getPassword())) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-			response.getWriter().write("{\"error\":\"Wrong Password!\"}");
+			ResponseUtil.unauthorized(response, ApiResponse.error("Wrong Password"));
 			return;
 		}
 		
 		if(Role.STUDENT.name().equals(user.getRole())) {
 			if(UserStatus.PENDING.name().equals(user.getStatus())) {
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-				
-				response.getWriter().write("{\"error\":\"Pending Admin Approval!\"}");
+				ResponseUtil.forbidden(response, ApiResponse.error("Pending Admin Approval"));
 				return;
 			}
 			
 			if(UserStatus.REJECTED.name().equals(user.getStatus())) {
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-				
-				response.getWriter().write("{\"error\":\"Account Approval Rejected!\"}");
+				ResponseUtil.forbidden(response, ApiResponse.error("Account Approval Rejected"));
 				return;
 			}
 		}
 		
 		HttpSession session = request.getSession();
 		
-		SessionInfo userResponse = new SessionInfo(user.getId(), user.getName(), user.getRole());
-		session.setAttribute("info", userResponse);
-		String json = gson.toJson(userResponse);
+		SessionInfo sessionInfo = new SessionInfo(user.getId(), user.getName(), user.getRole());
+		session.setAttribute("info", sessionInfo);
 		
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().write(json);
+		ResponseUtil.ok(response, ApiResponse.success(sessionInfo));
 
 	}
 }

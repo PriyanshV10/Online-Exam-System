@@ -123,7 +123,7 @@ public class UserDao {
 		}
 	}
 	
-	public void updateUserStatus(int userId, String status) {
+	public boolean updateUserStatus(int userId, String status) {
 		Connection connection = null;
 		PreparedStatement st = null;
 		
@@ -131,12 +131,16 @@ public class UserDao {
 			connection = DBUtil.getConnection();
 			String query = "UPDATE users SET status = ? WHERE id = ?";
 			st = connection.prepareStatement(query);
+			
 			st.setString(1, status);
 			st.setInt(2, userId);
-			st.executeUpdate();
+			
+			int rows = st.executeUpdate();
+			return rows > 0;
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO: handle exception
+			return false;
 		} finally {
 			DBUtil.closeResources(connection, st, null);
 		}

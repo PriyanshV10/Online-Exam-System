@@ -2,7 +2,9 @@ package com.exam.controller;
 
 import java.io.IOException;
 
-import com.google.gson.Gson;
+import com.exam.model.ApiResponse;
+import com.exam.model.SessionInfo;
+import com.exam.util.ResponseUtil;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,21 +18,17 @@ public class CurrentUserServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession(false);
-
-		if (session == null || session.getAttribute("info") == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.setContentType("application/json");
-			
-			response.getWriter().write("{\"error\":\"Not Logged In!\"}");
+		if (session == null) {
+			ResponseUtil.unauthorized(response);
 			return;
 		}
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.setContentType("application/json");
-
-		Gson gson = new Gson();
-		String data = gson.toJson(session.getAttribute("info"));
-
-		response.getWriter().write(data);
-
+		
+		SessionInfo info = (SessionInfo) session.getAttribute("info");
+		if(info == null) {
+			ResponseUtil.unauthorized(response);
+			return;
+		}
+		
+		ResponseUtil.ok(response, info);
 	}
 }

@@ -1,6 +1,5 @@
 package com.exam.model;
 
-public class ApproveUserRequest {
-	public int id;
+public class UpdateUserRequest {
 	public String status;
 }

@@ -123,5 +123,23 @@ public class QuestionDao {
 			DBUtil.closeResources(connection, st, rs);
 		}
 	}
+	
+	public int getMarks(int id) {
+		String query = "SELECT marks FROM questions WHERE id = ?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement st = con.prepareStatement(query)) {
+			st.setInt(1, id);
+
+			ResultSet rs = st.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+			return 0;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
 
 }

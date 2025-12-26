@@ -14,6 +14,10 @@ import api from "./api/api";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
+import AdminRoute from "./routes/AdminRoute";
+import AdminExamList from "./pages/AdminExamList";
+import CreateExam from "./pages/CreateExam";
+import ManageExam from "./pages/ManageExam";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -101,6 +105,35 @@ export default function App() {
           path="/profile"
           element={
             <ProtectedRoute user={user}>{/* <Profile /> */}</ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+
+        <Route
+          path="/admin/exams"
+          element={
+            <AdminRoute user={user}>
+              <AdminExamList />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/exams/create"
+          element={
+            <AdminRoute user={user}>
+              <CreateExam />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/exams/:id"
+          element={
+            <AdminRoute user={user}>
+              <ManageExam />
+            </AdminRoute>
           }
         />
 

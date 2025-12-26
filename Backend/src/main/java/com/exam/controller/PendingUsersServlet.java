@@ -7,7 +7,6 @@ import com.exam.dao.UserDao;
 import com.exam.model.ApiResponse;
 import com.exam.model.User;
 import com.exam.util.ResponseUtil;
-import com.google.gson.Gson;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

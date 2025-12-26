@@ -1,0 +1,162 @@
+package com.exam.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.exam.model.Attempt;
+import com.exam.util.DBUtil;
+
+public class AttemptDao {
+
+	public List<Attempt> getAttemptsByUser(int userId) {
+		String sql = """
+				    SELECT id, exam_id, score, started_at, submitted_at
+				    FROM attempts
+				    WHERE user_id = ? AND submitted_at IS NOT NULL
+				    ORDER BY submitted_at DESC
+				""";
+
+		List<Attempt> list = new ArrayList<>();
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, userId);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Attempt a = new Attempt();
+				a.setId(rs.getInt("id"));
+				a.setUserId(userId);
+				a.setExamId(rs.getInt("exam_id"));
+				a.setScore(rs.getInt("score"));
+				a.setStartedAt(rs.getTimestamp("started_at"));
+				a.setSubmittedAt(rs.getTimestamp("submitted_at"));
+				list.add(a);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public Attempt getAttemptById(int attemptId) {
+		String sql = "SELECT * FROM attempts WHERE id=? AND submitted_at IS NOT NULL";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, attemptId);
+			ResultSet rs = ps.executeQuery();
+
+			if (!rs.next())
+				return null;
+
+			Attempt a = new Attempt();
+			a.setId(rs.getInt("id"));
+			a.setUserId(rs.getInt("user_id"));
+			a.setExamId(rs.getInt("exam_id"));
+			a.setScore(rs.getInt("score"));
+			a.setStartedAt(rs.getTimestamp("started_at"));
+			a.setSubmittedAt(rs.getTimestamp("submitted_at"));
+			return a;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Integer findAttempt(int userId, int examId) {
+		String sql = "SELECT id FROM attempts WHERE user_id=? AND exam_id=?";
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, userId);
+			ps.setInt(2, examId);
+			ResultSet rs = ps.executeQuery();
+			return rs.next() ? rs.getInt(1) : null;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void submitAttempt(int attemptId, int score) {
+		String sql = "UPDATE attempts SET score=?, submitted_at=NOW() WHERE id=?";
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, score);
+			ps.setInt(2, attemptId);
+			ps.executeUpdate();
+
+		} catch (Exception ignored) {
+		}
+	}
+
+	public Integer getExistingAttempt(int userId, int examId) {
+		String sql = "SELECT id FROM attempts WHERE user_id = ? AND exam_id = ?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, userId);
+			ps.setInt(2, examId);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next())
+				return rs.getInt(1);
+			return null;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public int startAttempt(int userId, int examId) {
+		String sql = "INSERT INTO attempts (user_id, exam_id, started_at) VALUES (?, ?, NOW())";
+
+		try (Connection con = DBUtil.getConnection();
+				PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+			ps.setInt(1, userId);
+			ps.setInt(2, examId);
+			ps.executeUpdate();
+
+			ResultSet rs = ps.getGeneratedKeys();
+			if (rs.next())
+				return rs.getInt(1);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public Attempt getAttempt(int id) {
+		String sql = "SELECT * FROM attempts WHERE id = ?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, id);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				Attempt attempt = new Attempt();
+
+				attempt.setId(rs.getInt("id"));
+				attempt.setUserId(rs.getInt("user_id"));
+				attempt.setExamId(rs.getInt("exam_id"));
+				attempt.setScore(rs.getInt("score"));
+
+				return attempt;
+			}
+			return null;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+}

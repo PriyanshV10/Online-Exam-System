@@ -171,7 +171,7 @@ public class ExamDao {
 		}
 	}
 
-	public List<Exam> getPublishedExams() {
+	public List<Exam> getExamsByStatus(String status) {
 		Connection connection = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -180,7 +180,7 @@ public class ExamDao {
 			connection = DBUtil.getConnection();
 			String query = "SELECT * FROM exams WHERE status = ?";
 			st = connection.prepareStatement(query);
-			st.setString(1, ExamStatus.PUBLISHED.name());
+			st.setString(1, status);
 			rs = st.executeQuery();
 
 			List<Exam> list = new ArrayList<>();

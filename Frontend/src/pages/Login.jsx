@@ -18,15 +18,11 @@ export default function Login({ setUser }) {
 
       navigate("/");
     } catch (err) {
-      if (err.response) {
-        const status = err.response.status;
-        const message = err.response.data?.error || "Login failed";
+      if (err.response.data) {
+        const res = err.response.data;
+        const message = res.message || "Login failed";
 
-        if (status === 400 || status === 401 || status === 403) {
-          alert(message);
-        } else {
-          alert("Something went wrong");
-        }
+        alert(message)
       } else {
         alert("Server not reachable");
       }

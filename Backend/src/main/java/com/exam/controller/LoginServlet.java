@@ -72,7 +72,11 @@ public class LoginServlet extends HttpServlet {
 		
 		HttpSession session = request.getSession();
 		
-		SessionInfo sessionInfo = new SessionInfo(user.getId(), user.getName(), user.getRole());
+		SessionInfo sessionInfo = new SessionInfo();
+		sessionInfo.setId(user.getId());
+		sessionInfo.setName(user.getName());
+		sessionInfo.setEmail(user.getEmail());
+		sessionInfo.setRole(user.getRole());
 		session.setAttribute("info", sessionInfo);
 		
 		ResponseUtil.ok(response, ApiResponse.success(sessionInfo));

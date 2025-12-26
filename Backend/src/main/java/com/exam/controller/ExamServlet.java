@@ -82,7 +82,7 @@ public class ExamServlet extends HttpServlet {
 	
 	private void getExams(HttpServletResponse response) throws IOException {
 		ExamDao dao = new ExamDao();
-		List<Exam> list = dao.getPublishedExams();
+		List<Exam> list = dao.getExamsByStatus(ExamStatus.PUBLISHED.name());
 		
 		ResponseUtil.ok(response, ApiResponse.success(list));
 	}

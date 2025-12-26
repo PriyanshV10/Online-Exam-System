@@ -69,7 +69,7 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute user={user}>
-              <Dashboard />
+              <Dashboard user={user} />
             </ProtectedRoute>
           }
         />
@@ -101,23 +101,7 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute user={user}>{/* <Profile /> */}</ProtectedRoute>
-          }
-        />
-
         {/* Admin Routes */}
-
-        <Route
-          path="/admin/exams"
-          element={
-            <AdminRoute user={user}>
-              <AdminExamList />
-            </AdminRoute>
-          }
-        />
         
         <Route
           path="/admin/exams/create"

@@ -27,17 +27,11 @@ export default function Register() {
         navigate("/");
       }, 3000);
     } catch (err) {
-      if (err.response) {
-        const status = err.response.status;
-        const msg = err.response.data?.error || "Registration failed";
+      if (err.response.data) {
+        const res = err.response.data;
+        const msg = res.message || "Registration failed";
 
-        if (status === 400) {
-          setMessage(msg);
-        } else if (status === 409) {
-          setMessage(msg);
-        } else {
-          setMessage("Server error. Try again later.");
-        }
+        setMessage(msg);
       } else {
         setMessage("Server not reachable");
       }

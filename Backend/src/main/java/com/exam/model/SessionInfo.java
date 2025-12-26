@@ -3,7 +3,9 @@ package com.exam.model;
 public class SessionInfo {
 	int id;
 	String name;
+	String email;
 	String role;
+
 	public int getId() {
 		return id;
 	}
@@ -20,18 +22,19 @@ public class SessionInfo {
 		this.name = name;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public String getRole() {
 		return role;
 	}
 
 	public void setRole(String role) {
-		this.role = role;
-	}
-
-	
-	public SessionInfo(int id, String name, String role) {
-		this.id = id;
-		this.name = name;
 		this.role = role;
 	}
 }

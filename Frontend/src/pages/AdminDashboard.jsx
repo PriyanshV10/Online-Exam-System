@@ -1,38 +1,30 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
+import ExamManagement from "../components/ExamManagement";
+import UserManagement from "../components/UserManagent";
 
 export default function AdminDashboard() {
-  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchPendingUsers = async () => {
+  const fetchStats = async () => {
     try {
-      const res = await api.get("/admin/users");
-      setUsers(res.data.data);
+      const res = await api.get("/admin/stats");
+      setStats(res.data.data);
     } catch (err) {
-      setError("Failed to load pending users" + err);
+      setError(err?.response?.data?.message || "Failed to load stats");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPendingUsers();
+    fetchStats();
   }, []);
 
-  const handleUpdate = async (userId, status) => {
-    try {
-      const res = await api.post("/admin/update-user", { id: userId, status });
-      alert(res.data.message);
-      setUsers(users.filter((u) => u.id !== userId));
-    } catch {
-      alert("Failed to update user status!");
-    }
-  };
-
   if (loading) {
-    return <div className="text-white p-8">Loading pending approvals...</div>;
+    return <div className="text-white p-8">Loading...</div>;
   }
 
   if (error) {
@@ -40,44 +32,65 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen max-w-4xl mx-auto bg-[#101010] text-white mt-16">
-      <h1 className="text-3xl font-bold mb-6">Admin - User Approvals</h1>
+    <div className="min-h-screen w-3/4 mx-auto bg-[#101010] text-white mt-8">
+      <div className="flex justify-between gap-4">
+        {/* No of exams, published exams, users, approved users */}
+        <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
+          <div className="flex items-center">
+            <img
+              src={`/assets/exam.png`}
+              className="w-16 p-2 h-16 mr-4"
+              alt="exam"
+            />
+          </div>
+          <div className="flex flex-col justify-around">
+            <div className="text-4xl font-bold">{stats.totalExams}</div>
+            <div className="text-sm">Exams Created</div>
+          </div>
+        </div>
+        <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
+          <div className="flex items-center">
+            <img
+              src={`/assets/exam.png`}
+              className="w-16 p-2 h-16 mr-4"
+              alt="exam"
+            />
+          </div>
+          <div className="flex flex-col justify-around">
+            <div className="text-4xl font-bold">{stats.publishedExams}</div>
+            <div className="text-sm">Exams Published</div>
+          </div>
+        </div>
+        <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
+          <div className="flex items-center">
+            <img
+              src={`/assets/users.png`}
+              className="p-2 w-16 h-16 mr-4"
+              alt="exam"
+            />
+          </div>
+          <div className="flex flex-col justify-around">
+            <div className="text-4xl font-bold">{stats.totalUsers}</div>
+            <div className="text-sm">Registered Users</div>
+          </div>
+        </div>
+        <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
+          <div className="flex items-center">
+            <img
+              src={`/assets/users.png`}
+              className="p-2 w-16 h-16 mr-4"
+              alt="exam"
+            />
+          </div>
+          <div className="flex flex-col justify-around">
+            <div className="text-4xl font-bold">{stats.approvedUsers}</div>
+            <div className="text-sm">Active Users</div>
+          </div>
+        </div>
+      </div>
 
-      {users.length === 0 ? (
-        <p className="text-gray-400">No pending users.</p>
-      ) : (
-        <table className="w-full bg-[#282828] rounded-lg overflow-hidden">
-          <thead className="bg-[#1f1f1f]">
-            <tr>
-              <th className="p-3 w-1/3 text-left">Name</th>
-              <th className="p-3 w-1/3 text-left">Email</th>
-              <th className="p-3 w-1/3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-t border-gray-700">
-                <td className="p-3">{user.name}</td>
-                <td className="p-3">{user.email}</td>
-                <td className="p-3 flex gap-3">
-                  <button
-                    onClick={() => handleUpdate(user.id, "APPROVED")}
-                    className="bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleUpdate(user.id, "REJECTED")}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <UserManagement refreshStats={fetchStats} />
+      <ExamManagement />
     </div>
   );
 }

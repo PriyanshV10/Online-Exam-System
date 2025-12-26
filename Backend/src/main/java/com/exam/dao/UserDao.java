@@ -10,6 +10,39 @@ import com.exam.model.User;
 import com.exam.util.DBUtil;
 
 public class UserDao {
+	
+	public List<User> getAllUsers() {
+		Connection connection = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = DBUtil.getConnection();
+			String query = "SELECT * FROM users WHERE role = \"STUDENT\" ORDER BY created_at DESC";
+			st = connection.prepareStatement(query);
+			rs = st.executeQuery();
+			
+			List<User> list = new ArrayList<>();
+			while(rs.next()) {
+				User user = new User();
+				user.setId(rs.getInt("id"));
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setRole(rs.getString("role"));				
+				user.setStatus(rs.getString("status"));
+				
+				list.add(user);
+			}
+			
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+			return new ArrayList<>();
+		} finally {
+			DBUtil.closeResources(connection, st, rs);
+		}
+	}
 
 	public User findByEmail(String email) {
 		Connection connection = null;
@@ -90,15 +123,16 @@ public class UserDao {
 		}
 	}
 	
-	public List<User> getPendingUsers() {
+	public List<User> getUsersByStatus(String status) {
 		Connection connection = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
 		try {
 			connection = DBUtil.getConnection();
-			String query = "SELECT * FROM users WHERE role = \"STUDENT\" AND status = \"PENDING\"";
+			String query = "SELECT * FROM users WHERE role = \"STUDENT\" AND status = ?";
 			st = connection.prepareStatement(query);
+			st.setString(1, status);
 			rs = st.executeQuery();
 			
 			List<User> list = new ArrayList<>();

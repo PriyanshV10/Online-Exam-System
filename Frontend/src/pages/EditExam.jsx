@@ -6,17 +6,23 @@ import { Plus, Search, X } from "lucide-react";
 export default function EditExam() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [exam, setExam] = useState({});
   const [questions, setQuestions] = useState([]);
   const [search, setSearch] = useState("");
-  const [newQuestion, setNewQuestion] = useState(false);
+  const [currentTotalMarks, setCurrentTotalMarks] = useState(0);
+
   const [text, setText] = useState("");
   const [marks, setMarks] = useState("");
   const [options, setOptions] = useState({ a: "", b: "", c: "", d: "" });
   const [correctOption, setCorrectOption] = useState("a");
+
+  const [newQuestion, setNewQuestion] = useState(false);
+  const [updateQuestion, setUpdateQuestion] = useState(false);
+
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   const fetchExam = async () => {
     try {
@@ -33,7 +39,10 @@ export default function EditExam() {
     try {
       const res = await api.get(`/admin/exams/${id}/questions`);
       setQuestions(res.data.data);
-      console.log(res.data.data);
+
+      let totalMarks = 0;
+      res.data.data.forEach((q) => (totalMarks += q.marks));
+      setCurrentTotalMarks(totalMarks);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load questions");
     } finally {
@@ -56,7 +65,7 @@ export default function EditExam() {
       alert("Exam published");
       navigate("/", { replace: true });
     } catch (err) {
-      alert(err.response?.data?.error || "Publish failed");
+      alert(err.response?.data?.message || "Publish failed");
     }
   };
 
@@ -100,28 +109,74 @@ export default function EditExam() {
     setOptions({ ...options, [key]: value });
   };
 
-  const addQuestion = async () => {
+  const saveQuestion = async () => {
+    if (!text.trim() || !marks || Object.keys(options).length < 2) {
+      alert("Fill all fields properly");
+      return;
+    }
+
+    const payload = {
+      text,
+      marks: Number(marks),
+      options,
+      correctOption,
+    };
+
     try {
-      if (!text || !marks || !options || !correctOption || options.length < 2) {
-        alert("Please fill all the fields");
-        return;
+      if (updateQuestion && editingQuestionId) {
+        // UPDATE
+        await api.put(
+          `/admin/exams/${id}/questions/${editingQuestionId}`,
+          payload
+        );
+        alert("Question updated");
+      } else {
+        // ADD
+        await api.post(`/admin/exams/${id}/questions`, payload);
+        alert("Question added");
       }
 
-      await api.post(`/admin/exams/${id}/questions`, {
-        text,
-        marks: Number(marks),
-        options,
-        correctOption,
-      });
+      resetQuestionForm();
+      fetchQuestion();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed");
+    }
+  };
 
-      alert("Question added");
+  const resetQuestionForm = () => {
+    setText("");
+    setMarks("");
+    setOptions({ a: "", b: "", c: "", d: "" });
+    setCorrectOption("a");
+    setUpdateQuestion(false);
+    setNewQuestion(false);
+    setEditingQuestionId(null);
+  };
 
-      setText("");
-      setMarks("");
-      setOptions({});
-      setCorrectOption("a");
+  const editQuestion = (question) => {
+    setText(question.text);
+    setMarks(question.marks);
 
-      setNewQuestion(false);
+    const opts = {};
+    let correct = "a";
+
+    question.options.forEach((o) => {
+      opts[o.label] = o.text;
+      if (o.isCorrect) correct = o.label;
+    });
+
+    setOptions(opts);
+    setCorrectOption(correct);
+
+    setEditingQuestionId(question.id);
+    setUpdateQuestion(true);
+    setNewQuestion(true);
+  };
+
+  const deleteQuestion = async (questionId) => {
+    try {
+      await api.delete(`/admin/exams/${id}/questions/${questionId}`);
+      alert("Question deleted");
       fetchQuestion();
     } catch (err) {
       alert(err.response?.data?.error || "Failed");
@@ -167,18 +222,18 @@ export default function EditExam() {
           <div className="flex gap-2">
             <Link
               to={`/admin/exams/${id}/edit`}
-              className="px-3 py-2 bg-green-700 rounded-lg"
+              className="px-3 py-2 bg-green-600 rounded-lg"
             >
               Edit
             </Link>
             <button
               onClick={() => publishExam()}
-              className="bg-amber-700 px-3 py-2 rounded-lg"
+              className="bg-amber-600 px-3 py-2 rounded-lg"
             >
               Publish
             </button>
             <button
-              className="bg-red-700 px-3 py-2 rounded-lg"
+              className="bg-red-600 px-3 py-2 rounded-lg"
               onClick={() => deleteExam()}
             >
               Delete
@@ -205,7 +260,7 @@ export default function EditExam() {
                 </div>
 
                 <button
-                  onClick={() => setNewQuestion(true)}
+                  onClick={() => {resetQuestionForm(); setNewQuestion(true)}}
                   className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
                 >
                   <Plus />
@@ -214,14 +269,20 @@ export default function EditExam() {
               </div>
             </div>
 
-            {newQuestion && (
+            <div className="p-4 border-b border-[#101010] font-medium">
+              Current Total Marks = {currentTotalMarks}
+            </div>
+
+            {(newQuestion || updateQuestion) && (
               <div className="p-4 border-b border-[#101010]">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full p-1 flex items-center justify-center font-semibold text-blue-600">
                     <img src="/assets/question.png" alt="" />
                   </div>
                   <div className="flex w-full flex-col">
-                    <h3 className="text-lg font-semibold">Add New Question</h3>
+                    <h3 className="text-lg font-semibold">
+                      {updateQuestion ? "Update Question" : "Add New Question"}
+                    </h3>
 
                     <div className="flex flex-col gap-3 mt-4">
                       {/* Question text */}
@@ -288,12 +349,18 @@ export default function EditExam() {
                         </button>
                       </div>
 
-                      <button
-                        onClick={() => addQuestion()}
-                        className="bg-blue-600 p-2 rounded-lg mt-3"
-                      >
-                        Add Question
-                      </button>
+                      <div className="flex gap-3 mt-3 w-full">
+                        <button
+                          onClick={() => saveQuestion()}
+                          className="bg-blue-600 p-2 rounded-lg w-full"
+                        >
+                          {updateQuestion ? "Update Question" : "Add Question"}
+                        </button>
+
+                        <button onClick={() => resetQuestionForm()} className="bg-red-600 p-2 rounded-lg w-full">
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -314,7 +381,7 @@ export default function EditExam() {
                       <h3 className="text-lg font-semibold">{question.text}</h3>
                       {/* Options */}
                       <div className="flex flex-col gap-2 mt-3">
-                        {question.options.map(({label, text, isCorrect}) => (
+                        {question.options.map(({ label, text, isCorrect }) => (
                           <div key={label + text}>
                             <div className="flex items-center gap-2">
                               <input
@@ -332,21 +399,20 @@ export default function EditExam() {
 
                   <div className="flex flex-col justify-between items-end gap-2">
                     <div>Marks: {question.marks}</div>
-                      <div className="flex gap-2 align-middle items-center">
-                        <Link
-                          to={`/admin/exams/${exam.id}`}
-                          className="bg-green-700 px-3 py-1 rounded-lg"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          className="bg-red-700 px-3 py-1 rounded-lg"
-                          onClick={() => deleteExam(exam.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                  
+                    <div className="flex gap-2 align-middle items-center">
+                      <button
+                        onClick={() => editQuestion(question)}
+                        className="bg-green-600 px-3 py-1 rounded-lg"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-600 px-3 py-1 rounded-lg"
+                        onClick={() => deleteQuestion(question.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

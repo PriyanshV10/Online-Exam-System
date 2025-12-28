@@ -1,4 +1,5 @@
 import AdminDashboard from "./AdminDashboard";
+import StudentDashboard from "./StudentDashboard";
 
 export default function Dashboard({ user }) {
   if (!user) {
@@ -16,7 +17,7 @@ export default function Dashboard({ user }) {
           <div className="bg-[#282828] w-3/4 mx-auto p-4 rounded-2xl flex gap-4">
             <div className="flex items-center">
               <img
-                src={`/assets/admin_avatar.png`}
+                src={user.role === "ADMIN" ? `/assets/admin_avatar.png` : "/assets/student.png"}
                 className="rounded-full w-20 h-20 mr-4"
                 alt={user.name}
               />

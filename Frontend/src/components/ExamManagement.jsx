@@ -142,8 +142,8 @@ const ExamManagement = ({ refreshStats }) => {
                   <div
                     className={`font-medium text-sm px-3 py-1 rounded-full  ${
                       exam.status === "DRAFT"
-                        ? "text-amber-700 bg-amber-100"
-                        : "text-green-700 bg-green-100"
+                        ? "text-amber-600 bg-amber-100"
+                        : "text-green-600 bg-green-100"
                     }`}
                   >
                     {exam.status[0] + exam.status.slice(1).toLowerCase()}
@@ -153,14 +153,14 @@ const ExamManagement = ({ refreshStats }) => {
                     <div className="flex gap-2 align-middle items-center">
                       <Link
                         to={`/admin/exams/${exam.id}`}
-                        className="bg-amber-700 px-3 py-1 rounded-lg"
+                        className="bg-amber-600 px-3 py-1 rounded-lg"
                       >
                         Edit
                       </Link>
-                      <button className="bg-green-700 px-3 py-1 rounded-lg" onClick={() => publishExam(exam.id)}>
+                      <button className="bg-green-600 px-3 py-1 rounded-lg" onClick={() => publishExam(exam.id)}>
                         Publish
                       </button>
-                      <button className="bg-red-700 px-3 py-1 rounded-lg" onClick={() => deleteExam(exam.id)}>Delete</button>
+                      <button className="bg-red-600 px-3 py-1 rounded-lg" onClick={() => deleteExam(exam.id)}>Delete</button>
                     </div>
                   )}
                 </div>

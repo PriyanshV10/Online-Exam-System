@@ -15,9 +15,9 @@ import api from "./api/api";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import AdminRoute from "./routes/AdminRoute";
-import AdminExamList from "./pages/AdminExamList";
 import CreateExam from "./pages/CreateExam";
-import ManageExam from "./pages/ManageExam";
+import EditExam from "./pages/EditExam";
+import UpdateExam from "./pages/UpdateExam";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -116,11 +116,19 @@ export default function App() {
           path="/admin/exams/:id"
           element={
             <AdminRoute user={user}>
-              <ManageExam />
+              <EditExam />
             </AdminRoute>
           }
         />
 
+        <Route
+          path="/admin/exams/:id/edit"
+          element={
+            <AdminRoute user={user}>
+              <UpdateExam />
+            </AdminRoute>
+          }
+        />
         {/* UNKNOWN ROUTES */}
 
         {/* If LOGGED IN → show 404 */}

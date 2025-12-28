@@ -33,7 +33,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen w-3/4 mx-auto bg-[#101010] text-white mt-8">
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-4 font-medium">
         {/* No of exams, published exams, users, approved users */}
         <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
           <div className="flex items-center">
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex flex-col justify-around">
             <div className="text-4xl font-bold">{stats.totalExams}</div>
-            <div className="text-sm">Exams Created</div>
+            <div className="text-sm">Total Exams</div>
           </div>
         </div>
         <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex flex-col justify-around">
             <div className="text-4xl font-bold">{stats.publishedExams}</div>
-            <div className="text-sm">Exams Published</div>
+            <div className="text-sm">Published Exams</div>
           </div>
         </div>
         <div className="w-1/4 bg-[#282828] p-4 rounded-2xl flex gap-2">
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       </div>
 
       <UserManagement refreshStats={fetchStats} />
-      <ExamManagement />
+      <ExamManagement refreshStats={fetchStats} />
     </div>
   );
 }

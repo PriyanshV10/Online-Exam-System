@@ -3,7 +3,7 @@ import api from "../api/api";
 import { Pencil, Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const ExamManagement = () => {
+const ExamManagement = ({ refreshStats }) => {
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -32,6 +32,27 @@ const ExamManagement = () => {
       e.description.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const publishExam = async (examId) => {
+    try {
+      await api.post(`/admin/exams/${examId}/publish`);
+      fetchExams();
+      refreshStats();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to publish exam");
+    }
+  };
+
+  const deleteExam = async (examId) => {
+    try {
+      await api.delete(`/admin/exams/${examId}`);
+      alert("Exam deleted");
+      fetchExams();
+      refreshStats();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to delete exam");
+    }
+  }
 
   const totalPages = Math.ceil(filteredExams.length / PAGE_SIZE);
 
@@ -105,13 +126,13 @@ const ExamManagement = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{exam.title}</h3>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-300">
                       {exam.description?.slice(0, 50) || "No description"}
                     </p>
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-gray-300">
                       {exam.duration} minutes
                     </div>
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-gray-300">
                       Total Marks: {exam.totalMarks}
                     </div>
                   </div>
@@ -136,9 +157,10 @@ const ExamManagement = () => {
                       >
                         Edit
                       </Link>
-                      <button className="bg-green-700 px-3 py-1 rounded-lg">
+                      <button className="bg-green-700 px-3 py-1 rounded-lg" onClick={() => publishExam(exam.id)}>
                         Publish
                       </button>
+                      <button className="bg-red-700 px-3 py-1 rounded-lg" onClick={() => deleteExam(exam.id)}>Delete</button>
                     </div>
                   )}
                 </div>

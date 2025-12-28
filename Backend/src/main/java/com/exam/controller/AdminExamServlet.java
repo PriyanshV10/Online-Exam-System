@@ -86,6 +86,30 @@ public class AdminExamServlet extends HttpServlet {
 		ResponseUtil.notFound(response, ApiResponse.error("Endpoint not Found"));
 	}
 
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String[] parts = pathParts(request);
+
+		// /api/admin/exams/{id}
+		if (parts.length == 1 && isNumber(parts[0])) {
+			updateExam(request, response, Integer.parseInt(parts[0]));
+			return;
+		}
+		
+		ResponseUtil.notFound(response, ApiResponse.error("Endpoint not Found"));
+	}
+	
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String[] parts = pathParts(request);
+		
+		// /api/admin/exams/{id}
+		if(parts.length == 1 && isNumber(parts[0])) {
+			deleteExam(response, Integer.parseInt(parts[0]));
+			return;
+		}
+		
+		ResponseUtil.notFound(response, ApiResponse.error("Endpoint not Found"));
+	}
+
 	private void listExams(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ExamDao dao = new ExamDao();
 		List<Exam> list = dao.getAllExams();
@@ -142,6 +166,41 @@ public class AdminExamServlet extends HttpServlet {
 		int examId = dao.createExam(data.title, data.description, data.duration, data.totalMarks, sessionInfo.getId());
 
 		ResponseUtil.created(response, ApiResponse.success("Exam Created Successfully", Map.of("examId", examId)));
+	}
+
+	private void updateExam(HttpServletRequest request, HttpServletResponse response, int examId)
+			throws JsonSyntaxException, JsonIOException, IOException {
+		Gson gson = new Gson();
+		ExamDao examDao = new ExamDao();
+
+		CreateExamRequest data = gson.fromJson(request.getReader(), CreateExamRequest.class);
+
+		if (data == null || data.title == null || data.title.trim().isEmpty() || data.description == null
+				|| data.duration <= 0 || data.totalMarks <= 0) {
+			ResponseUtil.badRequest(response, ApiResponse.error("Invalid Input"));
+			return;
+		}
+
+		Exam exam = examDao.getExamById(examId);
+
+		if (exam == null) {
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+			return;
+		}
+
+		if (ExamStatus.PUBLISHED.name().equals(exam.getStatus())) {
+			ResponseUtil.badRequest(response, ApiResponse.error("Cannot Edit a Published Exam"));
+			return;
+		}
+
+		boolean res = examDao.updateExam(examId, data.title, data.description, data.duration, data.totalMarks);
+
+		if (res) {
+			ResponseUtil.ok(response, ApiResponse.success("Exam Updated Successfully", Map.of("examId", examId)));
+		} else {
+			ResponseUtil.serverError(response, ApiResponse.error("Failed to update exam"));
+		}
+
 	}
 
 	private void publishExam(HttpServletRequest request, HttpServletResponse response, int examId) throws IOException {
@@ -222,6 +281,30 @@ public class AdminExamServlet extends HttpServlet {
 
 		ResponseUtil.created(response,
 				ApiResponse.success("Question added successfully", Map.of("questionId", questionId)));
+	}
+	
+	private void deleteExam(HttpServletResponse response, int examId) throws IOException {
+		ExamDao examDao = new ExamDao();
+		Exam exam = examDao.getExamById(examId);
+		
+		if(exam == null) {
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+			return;
+		}
+		
+		if(ExamStatus.PUBLISHED.name().equals(exam.getStatus())) {
+			ResponseUtil.badRequest(response, ApiResponse.error("Cannot delete a published exam"));
+			return;
+		}
+		
+		boolean res = examDao.deleteExam(examId);
+		
+		if(res) {
+			ResponseUtil.noContent(response);
+		}
+		else {
+			ResponseUtil.notFound(response, ApiResponse.error("Exam not found"));
+		}
 	}
 
 	private boolean isNumber(String s) {

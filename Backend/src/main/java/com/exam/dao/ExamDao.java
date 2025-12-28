@@ -3,7 +3,6 @@ package com.exam.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +43,42 @@ public class ExamDao {
 			return -1;
 		} finally {
 			DBUtil.closeResources(connection, st, rs);
+		}
+	}
+
+	public boolean updateExam(int examId, String title, String description, int duration, int totalMarks) {
+		Connection connection = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			connection = DBUtil.getConnection();
+			String query = "UPDATE exams SET title = ?, description = ?, duration = ?, total_marks = ? WHERE id = ?";
+			st = connection.prepareStatement(query);
+
+			st.setString(1, title);
+			st.setString(2, description);
+			st.setInt(3, duration);
+			st.setInt(4, totalMarks);
+			st.setInt(5, examId);
+
+			return st.executeUpdate() > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			DBUtil.closeResources(connection, st, rs);
+		}
+	}
+
+	public boolean deleteExam(int examId) {
+		String sql = "DELETE FROM exams WHERE id = ?";
+		try (Connection con = DBUtil.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+			st.setInt(1, examId);
+			return st.executeUpdate() == 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -122,32 +157,30 @@ public class ExamDao {
 
 	public StatusUpdateResult updateExamStatus(int examId, String newStatus) {
 
-	    String sql = "UPDATE exams SET status = ? WHERE id = ? AND status != ?";
+		String sql = "UPDATE exams SET status = ? WHERE id = ? AND status != ?";
 
-	    try (Connection con = DBUtil.getConnection();
-	         PreparedStatement ps = con.prepareStatement(sql)) {
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-	        ps.setString(1, newStatus);
-	        ps.setInt(2, examId);
-	        ps.setString(3, newStatus);
+			ps.setString(1, newStatus);
+			ps.setInt(2, examId);
+			ps.setString(3, newStatus);
 
-	        int rows = ps.executeUpdate();
+			int rows = ps.executeUpdate();
 
-	        if (rows > 0) {
-	            return StatusUpdateResult.SUCCESS;
-	        }
+			if (rows > 0) {
+				return StatusUpdateResult.SUCCESS;
+			}
 
-	        if (getExamById(examId) == null) {
-	            return StatusUpdateResult.NOT_FOUND;
-	        }
+			if (getExamById(examId) == null) {
+				return StatusUpdateResult.NOT_FOUND;
+			}
 
-	        return StatusUpdateResult.NO_CHANGE;
+			return StatusUpdateResult.NO_CHANGE;
 
-	    } catch (Exception e) {
-	        throw new RuntimeException(e);
-	    }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
-
 
 	public boolean hasQuestions(int examId) {
 		Connection connection = null;

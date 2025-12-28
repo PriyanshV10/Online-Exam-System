@@ -49,6 +49,19 @@ public class QuestionDao {
 		}
 	}
 
+	public boolean deleteQuestions(int examId) {
+		String query = "DELETE FROM questions WHERE exam_id = ?";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement st = con.prepareStatement(query);) {
+			st.setInt(1, examId);
+			return st.executeUpdate() == 1;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	public List<Question> getQuestionByExamId(int examId) {
 		Connection connection = null;
 		PreparedStatement st = null;
@@ -123,7 +136,7 @@ public class QuestionDao {
 			DBUtil.closeResources(connection, st, rs);
 		}
 	}
-	
+
 	public int getMarks(int id) {
 		String query = "SELECT marks FROM questions WHERE id = ?";
 

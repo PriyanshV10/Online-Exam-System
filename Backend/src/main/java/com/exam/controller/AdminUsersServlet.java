@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import com.exam.dao.UserDao;
-import com.exam.enums.UserStatus;
 import com.exam.model.ApiResponse;
 import com.exam.model.User;
 import com.exam.util.ResponseUtil;

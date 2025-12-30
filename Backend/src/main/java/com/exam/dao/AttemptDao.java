@@ -3,6 +3,7 @@ package com.exam.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class AttemptDao {
 	}
 
 	public Attempt getAttemptById(int attemptId) {
-		String sql = "SELECT * FROM attempts WHERE id=? AND submitted_at IS NOT NULL";
+		String sql = "SELECT * FROM attempts WHERE id = ?";
 
 		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -69,47 +70,31 @@ public class AttemptDao {
 		}
 	}
 
-	public Integer findAttempt(int userId, int examId) {
-		String sql = "SELECT id FROM attempts WHERE user_id=? AND exam_id=?";
-		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+	public Attempt getAttempt(int userId, int examId) {
+		String query = "SELECT * FROM attempts WHERE user_id = ? AND exam_id = ?";
+		try (Connection connection = DBUtil.getConnection();
+				PreparedStatement st = connection.prepareStatement(query)) {
 
-			ps.setInt(1, userId);
-			ps.setInt(2, examId);
-			ResultSet rs = ps.executeQuery();
-			return rs.next() ? rs.getInt(1) : null;
-
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	public void submitAttempt(int attemptId, int score) {
-		String sql = "UPDATE attempts SET score=?, submitted_at=NOW() WHERE id=?";
-		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-			ps.setInt(1, score);
-			ps.setInt(2, attemptId);
-			ps.executeUpdate();
-
-		} catch (Exception ignored) {
-		}
-	}
-
-	public Integer getExistingAttempt(int userId, int examId) {
-		String sql = "SELECT id FROM attempts WHERE user_id = ? AND exam_id = ?";
-
-		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-			ps.setInt(1, userId);
-			ps.setInt(2, examId);
-
-			ResultSet rs = ps.executeQuery();
-			if (rs.next())
-				return rs.getInt(1);
+			st.setInt(1, userId);
+			st.setInt(2, examId);
+			ResultSet rs = st.executeQuery();
+			
+			if(rs.next()) {
+				Attempt a = new Attempt();
+				
+				a.setId(rs.getInt("id"));
+				a.setUserId(rs.getInt("user_id"));
+				a.setExamId(rs.getInt("exam_id"));
+				a.setScore(rs.getInt("score"));
+				a.setStartedAt(rs.getTimestamp("started_at"));
+				a.setSubmittedAt(rs.getTimestamp("submitted_at"));
+				
+				return a;
+			}
+			
 			return null;
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -133,30 +118,35 @@ public class AttemptDao {
 		}
 		return -1;
 	}
+	
+	public void submitAttempt(int attemptId, int score) {
+		String sql = "UPDATE attempts SET score=?, submitted_at=NOW() WHERE id=?";
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-	public Attempt getAttempt(int id) {
-		String sql = "SELECT * FROM attempts WHERE id = ?";
+			ps.setInt(1, score);
+			ps.setInt(2, attemptId);
+			ps.executeUpdate();
+
+		} catch (Exception ignored) {
+		}
+	}
+
+	public void submitAttempt(int attemptId, int score, Timestamp submittedAt) {
+		String sql = """
+				    UPDATE attempts
+				    SET score = ?, submitted_at = ?
+				    WHERE id = ? AND submitted_at IS NULL
+				""";
 
 		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-			ps.setInt(1, id);
-
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				Attempt attempt = new Attempt();
-
-				attempt.setId(rs.getInt("id"));
-				attempt.setUserId(rs.getInt("user_id"));
-				attempt.setExamId(rs.getInt("exam_id"));
-				attempt.setScore(rs.getInt("score"));
-
-				return attempt;
-			}
-			return null;
-
+			ps.setInt(1, score);
+			ps.setTimestamp(2, submittedAt);
+			ps.setInt(3, attemptId);
+			ps.executeUpdate();
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
+
 }

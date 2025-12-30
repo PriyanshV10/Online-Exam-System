@@ -260,7 +260,10 @@ export default function EditExam() {
                 </div>
 
                 <button
-                  onClick={() => {resetQuestionForm(); setNewQuestion(true)}}
+                  onClick={() => {
+                    resetQuestionForm();
+                    setNewQuestion(true);
+                  }}
                   className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
                 >
                   <Plus />
@@ -309,7 +312,10 @@ export default function EditExam() {
 
                       {/* Options */}
                       <div className="flex flex-col gap-1">
-                        <label>Options</label>
+                        <label>
+                          Options{" "}
+                          <span className="text-gray-300">(Select the radio for correct answer)</span>{" "}
+                        </label>
 
                         {Object.entries(options).map(([key, value]) => (
                           <div key={key} className="flex gap-2 items-center">
@@ -357,7 +363,10 @@ export default function EditExam() {
                           {updateQuestion ? "Update Question" : "Add Question"}
                         </button>
 
-                        <button onClick={() => resetQuestionForm()} className="bg-red-600 p-2 rounded-lg w-full">
+                        <button
+                          onClick={() => resetQuestionForm()}
+                          className="bg-red-600 p-2 rounded-lg w-full"
+                        >
                           Cancel
                         </button>
                       </div>

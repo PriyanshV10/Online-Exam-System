@@ -155,7 +155,7 @@ public class QuestionDao {
 		}
 	}
 
-	public List<Question> getQuestionByExamId(int examId) {
+	public List<Question> getQuestionsByExamId(int examId) {
 		Connection connection = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import ExamList from "./pages/ExamList";
 import ExamAttempt from "./pages/ExamAttempt";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
@@ -70,15 +69,6 @@ export default function App() {
           element={
             <ProtectedRoute user={user}>
               <Dashboard user={user} />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/exams"
-          element={
-            <ProtectedRoute user={user}>
-              <ExamList />
             </ProtectedRoute>
           }
         />

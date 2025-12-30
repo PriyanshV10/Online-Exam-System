@@ -153,7 +153,7 @@ public class AdminExamServlet extends HttpServlet {
 		QuestionDao questionDao = new QuestionDao();
 		OptionDao optionDao = new OptionDao();
 
-		List<Question> questions = questionDao.getQuestionByExamId(examId);
+		List<Question> questions = questionDao.getQuestionsByExamId(examId);
 
 		for (Question q : questions) {
 			q.setOptions(optionDao.getOptionsByQuestionId(q.getId()));
@@ -190,7 +190,7 @@ public class AdminExamServlet extends HttpServlet {
 			return;
 		}
 
-		if (!dao.hasQuestions(examId)) {
+		if (dao.totalQuestions(examId) <= 0) {
 			ResponseUtil.badRequest(response, ApiResponse.error("Exam has no Questions"));
 			return;
 		}

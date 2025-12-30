@@ -19,8 +19,8 @@ public class Attempt {
 	public Timestamp getSubmittedAt() {
 		return submittedAt;
 	}
-	public void setSubmittedAt(Timestamp submieedAt) {
-		this.submittedAt = submieedAt;
+	public void setSubmittedAt(Timestamp submittedAt) {
+		this.submittedAt = submittedAt;
 	}
 	public int getId() {
 		return id;

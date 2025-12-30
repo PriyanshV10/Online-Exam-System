@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { Plus, Search } from "lucide-react";
-import { Link } from "react-router-dom";
 
-const ExamManagement = ({ refreshStats }) => {
+export default function ExamList({ refreshStats }) {
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -14,7 +14,7 @@ const ExamManagement = ({ refreshStats }) => {
 
   const fetchExams = async () => {
     try {
-      const res = await api.get("/admin/exams");
+      const res = await api.get("/exams");
       setExams(res.data.data);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load exams");
@@ -33,27 +33,6 @@ const ExamManagement = ({ refreshStats }) => {
     return matchStatus && matchSearch;
   });
 
-  const publishExam = async (examId) => {
-    try {
-      await api.post(`/admin/exams/${examId}/publish`);
-      fetchExams();
-      refreshStats();
-    } catch (err) {
-      alert(err?.response?.data?.message || "Failed to publish exam");
-    }
-  };
-
-  const deleteExam = async (examId) => {
-    try {
-      await api.delete(`/admin/exams/${examId}`);
-      alert("Exam deleted");
-      fetchExams();
-      refreshStats();
-    } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete exam");
-    }
-  }
-
   const totalPages = Math.ceil(filteredExams.length / PAGE_SIZE);
 
   const paginatedExams = filteredExams.slice(
@@ -63,6 +42,7 @@ const ExamManagement = ({ refreshStats }) => {
 
   useEffect(() => {
     fetchExams();
+    refreshStats();
   }, []);
 
   if (loading) {
@@ -100,17 +80,10 @@ const ExamManagement = ({ refreshStats }) => {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="All">All Status</option>
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
+                <option value="NOT ATTEMPTED">Not Attempted</option>
+                <option value="ATTEMPTED">Attempted</option>
+                <option value="ATTEMPTING">Attempting</option>
               </select>
-
-              <Link
-                to="/admin/exams/create"
-                className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Plus />
-                Add New Exam
-              </Link>
             </div>
           </div>
 
@@ -135,13 +108,16 @@ const ExamManagement = ({ refreshStats }) => {
                     <div className="text-sm text-gray-300">
                       Total Marks: {exam.totalMarks}
                     </div>
+                    <div className="text-sm text-gray-300">
+                      No. of Questions {exam.totalQuestions}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex flex-col justify-between items-end gap-2">
                   <div
                     className={`font-medium text-sm px-3 py-1 rounded-full  ${
-                      exam.status === "DRAFT"
+                      exam.status === "ATTEMPTED"
                         ? "text-amber-600 bg-amber-100"
                         : "text-green-600 bg-green-100"
                     }`}
@@ -149,18 +125,14 @@ const ExamManagement = ({ refreshStats }) => {
                     {exam.status[0] + exam.status.slice(1).toLowerCase()}
                   </div>
 
-                  {exam.status === "DRAFT" && (
+                  {exam.status !== "ATTEMPTED"&& (
                     <div className="flex gap-2 align-middle items-center">
                       <Link
-                        to={`/admin/exams/${exam.id}`}
-                        className="bg-amber-600 px-3 py-1 rounded-lg"
+                        to={`/exam/${exam.id}`}
+                        className="bg-blue-600 px-3 py-1 rounded-lg"
                       >
-                        Edit
+                        {exam.status === "NOT ATTEMPTED" ? "Start" : "Resume"}
                       </Link>
-                      <button className="bg-green-600 px-3 py-1 rounded-lg" onClick={() => publishExam(exam.id)}>
-                        Publish
-                      </button>
-                      <button className="bg-red-600 px-3 py-1 rounded-lg" onClick={() => deleteExam(exam.id)}>Delete</button>
                     </div>
                   )}
                 </div>
@@ -196,6 +168,4 @@ const ExamManagement = ({ refreshStats }) => {
       )}
     </div>
   );
-};
-
-export default ExamManagement;
+}

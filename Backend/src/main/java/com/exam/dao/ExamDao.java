@@ -182,7 +182,7 @@ public class ExamDao {
 		}
 	}
 
-	public boolean hasQuestions(int examId) {
+	public int totalQuestions(int examId) {
 		Connection connection = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -194,11 +194,16 @@ public class ExamDao {
 			st.setInt(1, examId);
 			rs = st.executeQuery();
 
-			return rs.next();
+			int questions = 0;
+			while (rs.next()) {
+				questions++;
+			}
+
+			return questions;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
-			return false;
+			return 0;
 		} finally {
 			DBUtil.closeResources(connection, st, rs);
 		}
@@ -211,7 +216,7 @@ public class ExamDao {
 
 		try {
 			connection = DBUtil.getConnection();
-			String query = "SELECT * FROM exams WHERE status = ?";
+			String query = "SELECT * FROM exams WHERE status = ? ORDER BY created_at DESC";
 			st = connection.prepareStatement(query);
 			st.setString(1, status);
 			rs = st.executeQuery();
@@ -238,6 +243,29 @@ public class ExamDao {
 			return new ArrayList<>();
 		} finally {
 			DBUtil.closeResources(connection, st, rs);
+		}
+	}
+
+	public int calculateScore(int attemptId) {
+		String sql = """
+				    SELECT SUM(q.marks)
+				    FROM answers a
+				    JOIN options o ON a.selected_option_id = o.id
+				    JOIN questions q ON a.question_id = q.id
+				    WHERE a.attempt_id = ?
+				      AND o.is_correct = 1
+				""";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, attemptId);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next())
+				return rs.getInt(1);
+			return 0;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -83,4 +83,20 @@ public class AnswerDao {
 
 		return list;
 	}
+	
+	public Integer getSelectedOption(int attemptId, int questionId) {
+		String query = "SELECT selected_option_id FROM answers WHERE attempt_id = ? AND question_id = ?";
+		
+		try(Connection connection = DBUtil.getConnection(); PreparedStatement st = connection.prepareStatement(query)) {
+			st.setInt(1, attemptId);
+			st.setInt(2, questionId);
+			
+			ResultSet rs = st.executeQuery();
+			
+			return rs.next() ? rs.getInt("selected_option_id") : null; 
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

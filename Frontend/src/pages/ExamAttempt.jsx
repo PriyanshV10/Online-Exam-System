@@ -5,89 +5,61 @@ import api from "../api/api";
 export default function ExamAttempt() {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [attemptId, setAttemptId] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Start exam
-  useEffect(() => {
-    api
-      .post(`/exams/${id}/start`)
-      .then((res) => {
-        setAttemptId(res.data.data.attemptId);
-        setQuestions(res.data.data.questions);
-      })
-      .catch(() => {
-        alert("Failed to start exam");
-        navigate("/exams");
-      })
-      .finally(() => setLoading(false));
-  }, [id, navigate]);
 
-  const saveAnswer = async (questionId, optionId) => {
-    setAnswers({ ...answers, [questionId]: optionId });
-
-    await api.post(`/attempts/${attemptId}/answer`, {
-      questionId,
-      optionId,
-    });
-  };
-
-  const submitExam = async () => {
-    if (!window.confirm("Submit exam?")) return;
-
+  const attemptExam = async () => {
     try {
-      const res = await api.post(`/exams/${id}/submit`, {
-        attemptId,
-      });
+      const res = await api.post(`/exams/${id}/attempt`);
+      const aid = res.data.data.attemptId;
 
-      alert(`Exam submitted! Score: ${res.data.data.score}`);
-      navigate("/results");
-    } catch {
-      alert("Failed to submit exam");
+      fetchAttempt(aid);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to attempt exam");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const fetchAttempt = async (aid) => {
+    try {
+      const res = await api.get(`/attempts/${aid}`);
+      console.log(res.data.data);
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to fetch attempt");
+    }
+  }
+
+  useEffect(() => {
+    attemptExam();
+  }, [id]);
+
+  // find attempt first
+  // if attempt found, set exam status to attempting
+  // if no attempt found, create new attempt
+
+  const [examStatus, setExamStatus] = useState("not-started");
+
   if (loading) {
-    return <div className="text-white p-8">Starting exam...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101010] text-white">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101010] text-white">
+        {error}
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#101010] text-white p-8">
-      <h1 className="text-2xl font-bold mb-6">Exam</h1>
-
-      {questions.map((q, index) => (
-        <div key={q.id} className="mb-6 bg-[#1f1f1f] p-4 rounded">
-          <p className="font-semibold mb-2">
-            {index + 1}. {q.text}
-          </p>
-
-          {q.options.map((opt) => (
-            <label
-              key={opt.id}
-              className="block cursor-pointer mb-1"
-            >
-              <input
-                type="radio"
-                name={`q-${q.id}`}
-                checked={answers[q.id] === opt.id}
-                onChange={() => saveAnswer(q.id, opt.id)}
-                className="mr-2"
-              />
-              {opt.label}. {opt.text}
-            </label>
-          ))}
-        </div>
-      ))}
-
-      <button
-        onClick={submitExam}
-        className="bg-green-600 px-6 py-2 rounded hover:bg-green-700"
-      >
-        Submit Exam
-      </button>
+      {examStatus === "not-started" && <div></div>}
     </div>
   );
 }

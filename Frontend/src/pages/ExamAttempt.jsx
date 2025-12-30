@@ -74,7 +74,7 @@ export default function ExamAttempt() {
     const durationMs = exam.duration * 60 * 1000;
     const end = start + durationMs;
 
-    const now = Date.now() - new Date(startedAt).getTimezoneOffset() * 60 * 1000;
+    const now = Date.now();
     return Math.max(0, Math.floor((end - now) / 1000));
   };
 

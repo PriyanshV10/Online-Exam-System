@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,13 +102,16 @@ public class AttemptDao {
 	}
 
 	public int startAttempt(int userId, int examId) {
-		String sql = "INSERT INTO attempts (user_id, exam_id, started_at) VALUES (?, ?, NOW())";
+		Timestamp now = Timestamp.from(Instant.now());
+		
+		String sql = "INSERT INTO attempts (user_id, exam_id, started_at) VALUES (?, ?, ?)";
 
 		try (Connection con = DBUtil.getConnection();
 				PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
 			ps.setInt(1, userId);
 			ps.setInt(2, examId);
+			ps.setTimestamp(3, now);
 			ps.executeUpdate();
 
 			ResultSet rs = ps.getGeneratedKeys();

@@ -1,12 +1,11 @@
 package com.exam.service;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
+import java.time.Instant;
 
 import com.exam.dao.AttemptDao;
 import com.exam.dao.ExamDao;
 import com.exam.model.Attempt;
-import com.exam.util.TimeUtil;
 
 public class AttemptService {
 
@@ -14,11 +13,11 @@ public class AttemptService {
 		if (durationMinutes <= 0)
 			return false;
 
-		long startMillis = attempt.getStartedAt().getTime();
-		long endMillis = startMillis + durationMinutes * 60L * 1000L;
-		long nowMillis = TimeUtil.getCurrentTime();
+		long start = attempt.getStartedAt().getTime();
+		long end = start + durationMinutes * 60L * 1000L;
+		long now = System.currentTimeMillis();
 
-		return nowMillis >= endMillis;
+		return now >= end;
 	}
 
 	public boolean checkAndAutoSubmit(Attempt attempt, int durationMinutes) {
@@ -43,10 +42,9 @@ public class AttemptService {
 		ExamDao examDao = new ExamDao();
 
 		int score = examDao.calculateScore(attempt.getId());
-		Timestamp now = new Timestamp(TimeUtil.getCurrentTime());
+		Timestamp now = Timestamp.from(Instant.now());
 
 		attemptDao.submitAttempt(attempt.getId(), score, now);
-
 		attempt.setSubmittedAt(now);
 		attempt.setScore(score);
 	}

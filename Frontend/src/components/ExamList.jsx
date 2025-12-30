@@ -9,6 +9,7 @@ export default function ExamList({ refreshStats }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [exams, setExams] = useState([]);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -18,6 +19,17 @@ export default function ExamList({ refreshStats }) {
       setExams(res.data.data);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load exams");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchResults = async () => {
+    try {
+      const res = await api.get("/results");
+      setResults(res.data.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to load results");
     } finally {
       setLoading(false);
     }
@@ -42,6 +54,7 @@ export default function ExamList({ refreshStats }) {
 
   useEffect(() => {
     fetchExams();
+    fetchResults();
     refreshStats();
   }, []);
 
@@ -116,16 +129,15 @@ export default function ExamList({ refreshStats }) {
 
                 <div className="flex flex-col justify-between items-end gap-2">
                   <div
-                    className={`font-medium text-sm px-3 py-1 rounded-full  ${
-                      exam.status === "ATTEMPTED"
+                    className={`font-medium text-sm px-3 py-1 rounded-full  ${exam.status === "ATTEMPTED"
                         ? "text-amber-600 bg-amber-100"
                         : "text-green-600 bg-green-100"
-                    }`}
+                      }`}
                   >
                     {exam.status[0] + exam.status.slice(1).toLowerCase()}
                   </div>
 
-                  {exam.status !== "ATTEMPTED"&& (
+                  {exam.status !== "ATTEMPTED" && (
                     <div className="flex gap-2 align-middle items-center">
                       <Link
                         to={`/exam/${exam.id}`}
@@ -135,37 +147,52 @@ export default function ExamList({ refreshStats }) {
                       </Link>
                     </div>
                   )}
-                </div>
+
+                  {exam.status === "ATTEMPTED" && (() => {
+                    const result = results.find((r) => r.examId === exam.id);
+                    return result ? (
+                      <div className="flex gap-2 align-middle items-center">
+                        <Link
+                          to={`/attempts/${result.attemptId}/result`}
+                          className="bg-blue-600 px-3 py-1 rounded-lg"
+                        >
+                          View Result
+                        </Link>
+                      </div>
+                    ) : null;
+                  })()}
               </div>
             </div>
-          ))}
-
-          <div className="flex justify-between items-center p-4  text-sm">
-            <span>
-              Showing {PAGE_SIZE * (currentPage - 1) + 1}-
-              {Math.min(PAGE_SIZE * currentPage, paginatedExams.length)} of{" "}
-              {filteredExams.length} exams
-            </span>
-            <div className="flex gap-2">
-              <button
-                className="px-3 py-1 border rounded-lg disabled:opacity-50"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Previous
-              </button>
-
-              <button
-                className="px-3 py-1 border rounded-lg bg-blue-600 text-white disabled:opacity-50"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Next
-              </button>
             </div>
-          </div>
+      ))}
+
+      <div className="flex justify-between items-center p-4  text-sm">
+        <span>
+          Showing {PAGE_SIZE * (currentPage - 1) + 1}-
+          {Math.min(PAGE_SIZE * currentPage, paginatedExams.length)} of{" "}
+          {filteredExams.length} exams
+        </span>
+        <div className="flex gap-2">
+          <button
+            className="px-3 py-1 border rounded-lg disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Previous
+          </button>
+
+          <button
+            className="px-3 py-1 border rounded-lg bg-blue-600 text-white disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Next
+          </button>
         </div>
-      )}
+      </div>
     </div>
+  )
+}
+    </div >
   );
 }

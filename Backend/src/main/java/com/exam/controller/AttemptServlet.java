@@ -186,9 +186,11 @@ public class AttemptServlet extends HttpServlet {
 
 		Map<String, Object> data = new HashMap<>();
 		data.put("isSubmitted", true);
+		data.put("startedAt", attempt.getStartedAt().toInstant().toString());
 		data.put("submittedAt", attempt.getSubmittedAt().toInstant().toString());
 		data.put("examId", exam.getId());
 		data.put("examTitle", exam.getTitle());
+		data.put("examDuration", exam.getDuration());
 		data.put("score", attempt.getScore());
 		data.put("totalMarks", exam.getTotalMarks());
 		data.put("percentage", exam.getTotalMarks() == 0 ? 0 : (attempt.getScore() * 100.0) / exam.getTotalMarks());

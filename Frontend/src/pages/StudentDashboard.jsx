@@ -71,7 +71,7 @@ export default function StudentDashboard() {
             />
           </div>
           <div className="flex flex-col justify-around">
-            <div className="text-4xl font-bold">{stats.averageScore.toFixed(2)}</div>
+            <div className="text-4xl font-bold">{stats.averageScore.toFixed(0)} %</div>
             <div className="text-sm">Average Score</div>
           </div>
         </div>

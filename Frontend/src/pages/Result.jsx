@@ -1,61 +1,45 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
+import { useParams } from "react-router-dom";
 
 export default function Result() {
-  const [results, setResults] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const { id } = useParams();
 
-  useEffect(() => {
-    api
-      .get("/results")
-      .then((res) => setResults(res.data.data))
-      .catch(() => alert("Failed to load results"));
-  }, []);
+  const [result, setResult] = useState();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const viewDetails = async (attemptId) => {
-    const res = await api.get(`/results/${attemptId}`);
-    setSelected(res.data.data);
+  const fetchResult = async () => {
+    try {
+      const res = await api.get(`/attempts/${id}/result`);
+      setResult(res.data.data);
+      console.log(res.data.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to load result");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-[#101010] text-white p-8">
-      <h1 className="text-3xl font-bold mb-6">Results</h1>
+  useEffect(() => {
+    fetchResult();
+  }, []);
 
-      {results.length === 0 ? (
-        <p>No results yet.</p>
-      ) : (
-        <ul className="mb-8">
-          {results.map((r) => (
-            <li
-              key={r.attemptId}
-              className="cursor-pointer p-3 bg-[#1f1f1f] mb-2 rounded hover:bg-[#2a2a2a]"
-              onClick={() => viewDetails(r.attemptId)}
-            >
-              Exam #{r.examId} | Score: {r.score} | Time:{" "}
-              {r.durationMinutes} mins
-            </li>
-          ))}
-        </ul>
-      )}
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101010] text-white">
+        Loading...
+      </div>
+    );
+  }
 
-      {selected && (
-        <div className="bg-[#1f1f1f] p-5 rounded">
-          <h2 className="text-xl font-semibold mb-4">Details</h2>
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101010] text-white">
+        {error}
+      </div>
+    );
+  }
 
-          {selected.answers.map((a, i) => (
-            <div key={i} className="mb-2">
-              <p>{a.question}</p>
-              <p
-                className={
-                  a.correct ? "text-green-400" : "text-red-400"
-                }
-              >
-                Your answer: {a.selectedOption}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <div className="min-h-screen bg-[#101010] text-white p-8">hello</div>;
 }

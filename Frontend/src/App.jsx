@@ -83,7 +83,7 @@ export default function App() {
         />
 
         <Route
-          path="/results"
+          path="/attempts/:id/result"
           element={
             <ProtectedRoute user={user}>
               <Result />

@@ -6,22 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exam.dao.AnswerDao;
+
 import com.exam.dao.AttemptDao;
 import com.exam.dao.ExamDao;
-import com.exam.dao.OptionDao;
-import com.exam.dao.QuestionDao;
 import com.exam.enums.ExamStatus;
-import com.exam.model.Answer;
 import com.exam.model.ApiResponse;
 import com.exam.model.Attempt;
 import com.exam.model.Exam;
-import com.exam.model.Question;
 import com.exam.model.SessionInfo;
-import com.exam.model.SubmitExamRequest;
 import com.exam.util.ResponseUtil;
-import com.google.gson.Gson;
-import com.sun.net.httpserver.Request;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

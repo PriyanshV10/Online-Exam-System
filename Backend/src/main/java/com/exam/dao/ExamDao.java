@@ -89,7 +89,7 @@ public class ExamDao {
 
 		try {
 			connection = DBUtil.getConnection();
-			String query = "SELECT * FROM exams ORDER BY created_at DESC";
+			String query = "SELECT * FROM exams ORDER BY created_at DESC, id DESC";
 			st = connection.prepareStatement(query);
 			rs = st.executeQuery();
 

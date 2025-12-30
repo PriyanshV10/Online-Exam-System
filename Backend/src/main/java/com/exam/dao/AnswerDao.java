@@ -7,43 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.exam.model.Answer;
-import com.exam.model.ResultAnswer;
 import com.exam.util.DBUtil;
 
 public class AnswerDao {
-
-	public List<ResultAnswer> getResultAnswers(int attemptId) {
-		String sql = """
-				    SELECT q.question_text,
-				           o.option_text,
-				           o.is_correct
-				    FROM answers a
-				    JOIN questions q ON q.id = a.question_id
-				    JOIN options o ON o.id = a.selected_option_id
-				    WHERE a.attempt_id = ?
-				""";
-
-		List<ResultAnswer> list = new ArrayList<>();
-
-		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-			ps.setInt(1, attemptId);
-			ResultSet rs = ps.executeQuery();
-
-			while (rs.next()) {
-				ResultAnswer ra = new ResultAnswer();
-				ra.setQuestion(rs.getString("question_text"));
-				ra.setSelectedOption(rs.getString("option_text"));
-				ra.setCorrect(rs.getBoolean("is_correct"));
-				list.add(ra);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return list;
-	}
 
 	public void saveAnswer(int attemptId, int questionId, int optionId) {
 		String sql = """
@@ -60,6 +26,23 @@ public class AnswerDao {
 			ps.executeUpdate();
 
 		} catch (Exception ignored) {
+		}
+	}
+
+	public void deleteAnswer(int attemptId, int questionId) {
+		String sql = """
+				    DELETE FROM answers
+				    WHERE attempt_id = ? AND question_id = ?
+				""";
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setInt(1, attemptId);
+			ps.setInt(2, questionId);
+			ps.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -83,17 +66,18 @@ public class AnswerDao {
 
 		return list;
 	}
-	
+
 	public Integer getSelectedOption(int attemptId, int questionId) {
 		String query = "SELECT selected_option_id FROM answers WHERE attempt_id = ? AND question_id = ?";
-		
-		try(Connection connection = DBUtil.getConnection(); PreparedStatement st = connection.prepareStatement(query)) {
+
+		try (Connection connection = DBUtil.getConnection();
+				PreparedStatement st = connection.prepareStatement(query)) {
 			st.setInt(1, attemptId);
 			st.setInt(2, questionId);
-			
+
 			ResultSet rs = st.executeQuery();
-			
-			return rs.next() ? rs.getInt("selected_option_id") : null; 
+
+			return rs.next() ? rs.getInt("selected_option_id") : null;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

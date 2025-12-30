@@ -314,7 +314,9 @@ export default function EditExam() {
                       <div className="flex flex-col gap-1">
                         <label>
                           Options{" "}
-                          <span className="text-gray-300">(Select the radio for correct answer)</span>{" "}
+                          <span className="text-gray-300">
+                            (Select the radio for correct answer)
+                          </span>{" "}
                         </label>
 
                         {Object.entries(options).map(([key, value]) => (
@@ -410,7 +412,10 @@ export default function EditExam() {
                     <div>Marks: {question.marks}</div>
                     <div className="flex gap-2 align-middle items-center">
                       <button
-                        onClick={() => editQuestion(question)}
+                        onClick={() => {
+                          editQuestion(question);
+                          window.scrollTo({ top: 200, behavior: "smooth" });
+                        }}
                         className="bg-green-600 px-3 py-1 rounded-lg"
                       >
                         Edit

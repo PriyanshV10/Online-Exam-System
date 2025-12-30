@@ -1,6 +1,6 @@
 package com.exam.enums;
 
-public enum Role {
+public enum UserRole {
 	ADMIN,
 	STUDENT
 }

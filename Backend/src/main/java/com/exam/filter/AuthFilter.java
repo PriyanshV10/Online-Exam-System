@@ -2,7 +2,7 @@ package com.exam.filter;
 
 import java.io.IOException;
 
-import com.exam.enums.Role;
+import com.exam.enums.UserRole;
 import com.exam.model.ApiResponse;
 import com.exam.model.SessionInfo;
 import com.exam.util.ResponseUtil;
@@ -43,7 +43,7 @@ public class AuthFilter implements Filter {
 		if (path.contains("/admin")) {
 			SessionInfo sessionInfo = (SessionInfo) session.getAttribute("info");
 
-			if (!Role.ADMIN.name().equals(sessionInfo.getRole())) {
+			if (!UserRole.ADMIN.name().equals(sessionInfo.getRole())) {
 				ResponseUtil.forbidden(response, ApiResponse.error("Unauthorized"));
 				return;
 			}

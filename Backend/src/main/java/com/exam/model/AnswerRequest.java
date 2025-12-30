@@ -1,10 +1,10 @@
 package com.exam.model;
 
 public class AnswerRequest {
-	int questionId;
-	int optionId;
+	Integer questionId;
+	Integer optionId;
 
-	public int getQuestionId() {
+	public Integer getQuestionId() {
 		return questionId;
 	}
 
@@ -12,7 +12,7 @@ public class AnswerRequest {
 		this.questionId = questionId;
 	}
 
-	public int getOptionId() {
+	public Integer getOptionId() {
 		return optionId;
 	}
 

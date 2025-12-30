@@ -18,8 +18,6 @@ public class AttemptService {
 		long endMillis = startMillis + durationMinutes * 60L * 1000L;
 		long nowMillis = TimeUtil.getCurrentTime();
 
-		System.out.println(Arrays.asList(startMillis, endMillis, nowMillis));
-
 		return nowMillis >= endMillis;
 	}
 

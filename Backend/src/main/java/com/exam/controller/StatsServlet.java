@@ -12,9 +12,7 @@ import com.exam.model.ApiResponse;
 import com.exam.model.Attempt;
 import com.exam.model.Exam;
 import com.exam.model.SessionInfo;
-import com.exam.service.AttemptService;
 import com.exam.util.ResponseUtil;
-import com.exam.util.TimeUtil;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

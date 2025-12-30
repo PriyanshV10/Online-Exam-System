@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.exam.model.Attempt;
+import com.exam.model.ResultDto;
 import com.exam.util.DBUtil;
 
 public class AttemptDao {
@@ -78,20 +79,20 @@ public class AttemptDao {
 			st.setInt(1, userId);
 			st.setInt(2, examId);
 			ResultSet rs = st.executeQuery();
-			
-			if(rs.next()) {
+
+			if (rs.next()) {
 				Attempt a = new Attempt();
-				
+
 				a.setId(rs.getInt("id"));
 				a.setUserId(rs.getInt("user_id"));
 				a.setExamId(rs.getInt("exam_id"));
 				a.setScore(rs.getInt("score"));
 				a.setStartedAt(rs.getTimestamp("started_at"));
 				a.setSubmittedAt(rs.getTimestamp("submitted_at"));
-				
+
 				return a;
 			}
-			
+
 			return null;
 
 		} catch (Exception e) {
@@ -118,7 +119,7 @@ public class AttemptDao {
 		}
 		return -1;
 	}
-	
+
 	public void submitAttempt(int attemptId, int score) {
 		String sql = "UPDATE attempts SET score=?, submitted_at=NOW() WHERE id=?";
 		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -147,6 +148,56 @@ public class AttemptDao {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public List<ResultDto> getResultsByUser(int userId) {
+		String sql = """
+				    SELECT
+				        a.id            AS attempt_id,
+				        e.id            AS exam_id,
+				        e.title         AS exam_title,
+				        a.score         AS score,
+				        e.total_marks  AS total_marks,
+				        a.submitted_at AS submitted_at
+				    FROM attempts a
+				    JOIN exams e ON a.exam_id = e.id
+				    WHERE a.user_id = ?
+				      AND a.submitted_at IS NOT NULL
+				    ORDER BY a.submitted_at DESC
+				""";
+
+		List<ResultDto> results = new ArrayList<>();
+
+		try (Connection con = DBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+			ps.setInt(1, userId);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				ResultDto dto = new ResultDto();
+
+				dto.setAttemptId(rs.getInt("attempt_id"));
+				dto.setExamId(rs.getInt("exam_id"));
+				dto.setExamTitle(rs.getString("exam_title"));
+
+				int score = rs.getInt("score");
+				int totalMarks = rs.getInt("total_marks");
+
+				dto.setScore(score);
+				dto.setTotalMarks(totalMarks);
+
+				double percentage = totalMarks == 0 ? 0 : (score * 100.0) / totalMarks;
+				dto.setPercentage(percentage);
+
+				dto.setSubmittedAt(rs.getTimestamp("submitted_at"));
+
+				results.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return results;
 	}
 
 }

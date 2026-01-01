@@ -33,8 +33,11 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-black">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center text-slate-900 dark:text-white bg-slate-50 dark:bg-zinc-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <span className="font-medium animate-pulse">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -92,7 +95,7 @@ export default function App() {
         />
 
         {/* Admin Routes */}
-        
+
         <Route
           path="/admin/exams/create"
           element={
@@ -101,7 +104,7 @@ export default function App() {
             </AdminRoute>
           }
         />
-        
+
         <Route
           path="/admin/exams/:id"
           element={
@@ -126,7 +129,7 @@ export default function App() {
           path="*"
           element={user ? <NotFound /> : <Navigate to="/login" replace />}
         />
-      </Routes>
+      </Routes >
     </>
   );
 }

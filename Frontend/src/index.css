@@ -1,11 +1,107 @@
 @import "tailwindcss";
 
-/* Hide scrollbar but allow scrolling */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #121212;
+  --color-dark-surface-hover: #1e1e1e;
+  --color-primary-glow: rgba(139, 92, 246, 0.15);
+  --color-success-glow: rgba(34, 197, 94, 0.15);
+  --color-error-glow: rgba(239, 68, 68, 0.15);
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE & Edge */
-  scrollbar-width: none; /* Firefox */
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-gray-100 antialiased transition-colors duration-300;
+
+    /* Light Mode Background */
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.05), transparent 40%),
+      radial-gradient(circle at 0% 50%, rgba(200, 200, 200, 0.05), transparent 40%);
+  }
+
+  /* Dark Mode Background Override */
+  .dark body {
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.1), transparent 40%),
+      radial-gradient(circle at 0% 50%, rgba(50, 50, 50, 0.05), transparent 40%);
+  }
+
+  body {
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-gray-200 shadow-xl dark:bg-zinc-900/60 dark:border-white/5 dark:shadow-none transition-colors duration-300;
+  }
+
+  .glass-card {
+    @apply bg-white/50 backdrop-blur-md border border-gray-200 shadow-sm transition-all duration-300 dark:bg-zinc-900/40 dark:border-white/5 dark:shadow-none;
+  }
+
+  .glass-card:hover {
+    @apply bg-white/80 border-purple-500/30 shadow-lg shadow-purple-500/10 translate-y-[-2px] dark:bg-zinc-900/60 dark:border-purple-500/20 dark:shadow-purple-500/5;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl px-4 py-3 outline-none transition-all bg-white border border-gray-200 text-slate-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 dark:bg-zinc-900/50 dark:border-white/10 dark:text-white dark:placeholder-gray-500 dark:focus:ring-purple-500/50 dark:focus:border-purple-500/50;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl shadow-lg shadow-purple-900/20 transition-all active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply font-medium px-6 py-2.5 rounded-xl border transition-all active:scale-95 bg-white text-slate-700 border-gray-200 hover:bg-gray-50 dark:bg-zinc-800 dark:text-gray-200 dark:border-white/5 dark:hover:bg-zinc-700;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-gray-300 dark:bg-zinc-700;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-zinc-600;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
 }

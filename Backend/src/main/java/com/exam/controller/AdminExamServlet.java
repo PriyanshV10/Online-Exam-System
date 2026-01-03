@@ -340,6 +340,11 @@ public class AdminExamServlet extends HttpServlet {
 			return;
 		}
 
+		if (data.getMarks() + questionDao.getTotalMarks(examId) - question.getMarks() > exam.getTotalMarks()) {
+			ResponseUtil.conflict(response, ApiResponse.error("Total question marks exceed exam total marks"));
+			return;
+		}
+
 		boolean res = questionDao.updateQuestion(questionId, data.getText(), data.getMarks(), data.getOptions(),
 				data.getCorrectOption());
 		if (res) {

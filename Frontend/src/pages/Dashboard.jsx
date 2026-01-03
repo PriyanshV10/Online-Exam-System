@@ -15,7 +15,7 @@ export default function Dashboard({ user }) {
     <div className="min-h-screen pt-24 pb-12 px-6">
       <div className="max-w-[1600px] mx-auto space-y-8">
         {/* Profile Card */}
-        <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 animate-fade-in shadow-xl relative overflow-hidden">
+        <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 animate-fade-in shadow-xl relative overflow-hidden max-w-7xl mx-auto mt-8">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
           <div className="relative">

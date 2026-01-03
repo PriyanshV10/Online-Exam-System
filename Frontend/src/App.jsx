@@ -17,6 +17,8 @@ import AdminRoute from "./routes/AdminRoute";
 import CreateExam from "./pages/CreateExam";
 import EditExam from "./pages/EditExam";
 import UpdateExam from "./pages/UpdateExam";
+import ExamManagement from "./pages/ExamManagement";
+import UserManagement from "./pages/UserManagement";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -95,6 +97,24 @@ export default function App() {
         />
 
         {/* Admin Routes */}
+
+        <Route
+          path="/admin/exams"
+          element={
+            <AdminRoute user={user}>
+              <ExamManagement />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute user={user}>
+              <UserManagement />
+            </AdminRoute>
+          }
+        />
 
         <Route
           path="/admin/exams/create"

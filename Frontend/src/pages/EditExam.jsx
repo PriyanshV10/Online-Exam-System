@@ -176,7 +176,7 @@ export default function EditExam() {
       resetQuestionForm();
       fetchQuestion();
     } catch (err) {
-      showToast(err.response?.data?.error || "Failed", "error");
+      showToast(err.response?.data?.message || "Failed", "error");
     }
   };
 
@@ -222,7 +222,7 @@ export default function EditExam() {
           showToast("Question deleted successfully");
           fetchQuestion();
         } catch (err) {
-          showToast(err.response?.data?.error || "Failed", "error");
+          showToast(err.response?.data?.message || "Failed", "error");
         } finally {
           setConfirmModal(prev => ({ ...prev, isOpen: false }));
         }

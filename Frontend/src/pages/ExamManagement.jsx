@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
-import { Plus, Search, Filter, FileText, Clock, Trophy, Edit2, PlayCircle, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Filter, FileText, Clock, Trophy, Edit2, PlayCircle, Trash2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react"; // Added ArrowLeft
 import { Link } from "react-router-dom";
-import ConfirmDialog from "./ConfirmDialog";
-import Toast from "./Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
+import Toast from "../components/Toast";
 
-const ExamManagement = ({ refreshStats }) => {
+const ExamManagement = () => {
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -66,7 +66,6 @@ const ExamManagement = ({ refreshStats }) => {
           await api.post(`/admin/exams/${examId}/publish`);
           showToast("Exam published successfully");
           fetchExams();
-          refreshStats();
         } catch (err) {
           showToast(err?.response?.data?.message || "Failed to publish exam", "error");
         } finally {
@@ -87,7 +86,6 @@ const ExamManagement = ({ refreshStats }) => {
           await api.delete(`/admin/exams/${examId}`);
           showToast("Exam deleted successfully");
           fetchExams();
-          refreshStats();
         } catch (err) {
           showToast(err?.response?.data?.message || "Failed to delete exam", "error");
         } finally {
@@ -126,7 +124,7 @@ const ExamManagement = ({ refreshStats }) => {
   }
 
   return (
-    <div className="mt-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
       {/* Toast Notification */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
@@ -139,6 +137,26 @@ const ExamManagement = ({ refreshStats }) => {
         message={confirmModal.message}
         isDangerous={confirmModal.isDangerous}
       />
+
+      {/* Header */}
+      <div className="mb-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-4">
+          <ArrowLeft size={16} /> Back to Dashboard
+        </Link>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Exam Management</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Create and manage exams</p>
+          </div>
+          <Link
+            to="/admin/exams/create"
+            className="btn-primary flex items-center gap-2 whitespace-nowrap"
+          >
+            <Plus size={18} />
+            Create Exam
+          </Link>
+        </div>
+      </div>
 
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -167,14 +185,6 @@ const ExamManagement = ({ refreshStats }) => {
             </select>
           </div>
         </div>
-
-        <Link
-          to="/admin/exams/create"
-          className="btn-primary flex items-center gap-2 whitespace-nowrap"
-        >
-          <Plus size={18} />
-          Create Exam
-        </Link>
       </div>
 
       {exams.length === 0 ? (

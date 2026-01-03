@@ -73,7 +73,7 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="min-h-screen pt-24 px-6 pb-12 w-full max-w-7xl mx-auto">
+    <div className="min-h-screen py-8 px-6 pb-12 w-full max-w-7xl mx-auto">
       <div className="mb-10 animate-fade-in">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student Dashboard</h1>
         <p className="text-gray-500 dark:text-gray-400">Track your progress and assess your skills</p>

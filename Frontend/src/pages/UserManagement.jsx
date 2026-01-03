@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
-import { Check, X, Search, Filter, User, ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
-import ConfirmDialog from "./ConfirmDialog";
-import Toast from "./Toast";
+import { Link } from "react-router-dom"; // Added Link
+import { Check, X, Search, Filter, User, ChevronLeft, ChevronRight, MoreVertical, ArrowLeft } from "lucide-react"; // Added ArrowLeft
+import ConfirmDialog from "../components/ConfirmDialog";
+import Toast from "../components/Toast";
 
-const UserManagement = ({ refreshStats }) => {
+const UserManagement = () => {
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
@@ -79,7 +80,6 @@ const UserManagement = ({ refreshStats }) => {
           await api.patch(`/admin/users/${user.id}`, { status });
           showToast(`User ${isReject ? "rejected" : "approved"} successfully`);
           fetchUsers();
-          refreshStats();
         } catch (err) {
           showToast(err?.response?.data?.message || "Failed to update user", "error");
         } finally {
@@ -102,7 +102,19 @@ const UserManagement = ({ refreshStats }) => {
   }
 
   return (
-    <div className="mt-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      {/* Header */}
+      <div className="mb-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors mb-4">
+          <ArrowLeft size={16} /> Back to Dashboard
+        </Link>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">User Management</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Manage student access and accounts</p>
+          </div>
+        </div>
+      </div>
       {/* Toast Notification */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
-import { Plus, Search, Filter, FileText, Clock, Trophy, Edit2, PlayCircle, Trash2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react"; // Added ArrowLeft
+import { Plus, Search, Filter, FileText, Clock, Trophy, Edit2, PlayCircle, Trash2, ChevronLeft, ChevronRight, ArrowLeft, Eye } from "lucide-react"; // Added ArrowLeft
 import { Link } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
 import Toast from "../components/Toast";
@@ -251,6 +251,16 @@ const ExamManagement = () => {
                         <Trash2 size={18} />
                       </button>
                     </div>
+                  )}
+
+                  {exam.status === "PUBLISHED" && (
+                    <Link
+                        to={`/admin/exams/${exam.id}`}
+                        className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 dark:text-blue-400 transition-colors tooltip"
+                        title="View Exam"
+                      >
+                        <Eye size={18} />
+                      </Link>
                   )}
                 </div>
               ))}

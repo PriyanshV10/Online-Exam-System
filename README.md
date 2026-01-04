@@ -20,7 +20,7 @@ A comprehensive, full-stack online examination platform designed to facilitate s
 
 ### Backend
 -   **Language**: Java 17 (Jakarta EE)
--   **Core**: Pure Servlets (No heavy frameworks)
+-   **Core**: Pure Servlets
 -   **Database**: MySQL 8.0
 -   **Build Tool**: Maven
 
@@ -46,7 +46,6 @@ Detailed documentation for setting up and understanding the codebase is availabl
 3.  Run `npm run dev`.
 4.  Open `http://localhost:5173`.
 
-## 📸 Screenshots
 ## 📸 Screenshots
 
 ### Admin Portal

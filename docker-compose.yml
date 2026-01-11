@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql-db:
+    image: mysql:8.0.33
+    container_name: exam-system-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: exam_system
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Mount init.sql to automatically create tables on first startup
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - exam-network
+
+  # Java Backend Service
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: exam-system-backend
+    restart: on-failure
+    depends_on:
+      - mysql-db
+    environment:
+      DB_URL: jdbc:mysql://mysql-db:3306/exam_system?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: root
+      DB_PASSWORD: admin
+    networks:
+      - exam-network
+
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: exam-system-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - exam-network
+
+volumes:
+  mysql_data:
+
+
+networks:
+  exam-network:
+    driver: bridge

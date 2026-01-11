@@ -17,6 +17,9 @@ FROM nginx:alpine
 # Copy built artifacts from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Set default backend URL (prevents envsubst error if variable not set)
+ENV BACKEND_URL=http://backend:8080
+
 # Copy Nginx template (envsubst will replace variables on startup)
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 
